@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>돌봄 점검 관리</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h2, h3 {
+  color: #1f2937;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 28px;
+  text-align: center;
+}
+
+h3 {
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-icon {
+  font-size: 32px;
+}
+
+/* 버튼 스타일 */
+button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  margin: 5px;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-blue {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-blue:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+}
+
+.btn-green {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
+}
+
+.btn-green:hover:not(:disabled) {
+  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+}
+
+.btn-red {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
+}
+
+.btn-red:hover:not(:disabled) {
+  background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+}
+
+.btn-gray {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.btn-gray:hover:not(:disabled) {
+  background: #d1d5db;
+}
+
+/* 입력 필드 */
+input, select, textarea {
+  width: 100%;
+  padding: 12px 16px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* 섹션 */
+.section {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  padding: 20px;
+  margin: 15px 0;
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+}
+
+.section b {
+  display: block;
+  font-size: 18px;
+  color: #1f2937;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-icon {
+  font-size: 22px;
+}
+
+/* 라디오 버튼 */
+.radio {
+  margin: 10px 0;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.radio-label {
+  font-weight: 500;
+  color: #374151;
+  min-width: 120px;
+}
+
+.radio label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.radio label:hover {
+  background: #f3f4f6;
+}
+
+.radio input[type="radio"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* 테이블 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  font-size: 13px;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+th {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 14px;
+  text-align: center;
+  font-weight: 600;
+}
+
+td {
+  border: 1px solid #e5e7eb;
+  padding: 12px;
+  text-align: left;
+  background: white;
+}
+
+tr:hover td {
+  background: #f9fafb;
+}
+
+/* 로그인 화면 */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 40px);
+}
+
+.login-card {
+  max-width: 400px;
+  width: 100%;
+}
+
+.login-card h2 {
+  margin-bottom: 30px;
+}
+
+.login-info {
+  background: #f0f9ff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  border-left: 4px solid #0284c7;
+}
+
+.login-info p {
+  color: #0369a1;
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+/* 메뉴 화면 */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.menu-grid button {
+  width: 100%;
+  padding: 20px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.button-icon {
+  font-size: 24px;
+}
+
+/* 검색 폼 */
+.search-form {
+  background: #f9fafb;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  align-items: end;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* 빈 상태 */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.welcome-banner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.welcome-banner h3 {
+  color: white;
+  margin: 0;
+  justify-content: center;
+}
+
+/* 통계 카드 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  border-left: 4px solid #667eea;
+}
+
+.stat-card h4 {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.stat-card .stat-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+/* 로딩 */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: white;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .card {
+    padding: 20px;
+  }
+  
+  h2 {
+    font-size: 24px;
+  }
+  
+  h3 {
+    font-size: 20px;
+  }
+  
+  .radio {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  table {
+    font-size: 11px;
+  }
+  
+  th, td {
+    padding: 8px;
+  }
+}
+
+/* 인쇄 스타일 */
+@media print {
+  body {
+    background: white;
+    padding: 0;
+  }
+  
+  .btn-green, .btn-blue, .btn-gray, .btn-red {
+    display: none;
+  }
+  
+  .search-form {
+    display: none;
+  }
+  
+  .action-buttons {
+    display: none;
+  }
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+  <div class="loading">
+    <h2>⏳ 로딩 중...</h2>
+    <p>잠시만 기다려주세요</p>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  // ===== 전역 변수 =====
+  let supabase = null;
+  let currentUser = null;
+  let checklists = [];
+  let isLoading = false;
+  
+  // ===== Supabase 설정 =====
+  const SUPABASE_URL = 'https://nogzefpmsenbcxqlnmjl.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vZ3plZnBtc2VuYmN4cWxubWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgzNzU1MTcsImV4cCI6MjA1Mzk1MTUxN30.9vFiY_Cn4NqGQaEWD_cI5j6ILxvR5dMDOFVY_yxbpFQ';
+  
+  // ===== Supabase 초기화 =====
+  function initSupabase() {
+    try {
+      if (typeof window.supabase === 'undefined') {
+        console.error('Supabase 라이브러리가 로드되지 않았습니다.');
+        return false;
+      }
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      console.log('Supabase 초기화 완료');
+      return true;
+    } catch (error) {
+      console.error('Supabase 초기화 오류:', error);
+      return false;
+    }
+  }
+  
+  // ===== 세션 확인 =====
+  async function checkSession() {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) throw error;
+      
+      if (session && session.user) {
+        // 세션이 있으면 사용자 정보 설정
+        const metadata = session.user.user_metadata || {};
+        currentUser = {
+          id: session.user.id,
+          email: session.user.email,
+          name: metadata.name || session.user.email,
+          facility: metadata.facility || 'all'
+        };
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('세션 확인 오류:', error);
+      return false;
+    }
+  }
+  
+  // ===== 데이터 로드 =====
+  async function loadData() {
+    try {
+      isLoading = true;
+      const { data, error } = await supabase
+        .from('care')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      checklists = (data || []).map(row => ({
+        id: row.id,
+        date: row.check_date,
+        clientName: row.client,
+        worker: row.worker,
+        facility: row.facility,
+        createdAt: row.created_at,
+        health: row.info?.health || {},
+        hygiene: row.info?.hygiene || {},
+        meal: row.info?.meal || {},
+        daily: row.info?.daily || {},
+        med: row.info?.med || {},
+        env: row.info?.env || {},
+        special: row.info?.special || ''
+      }));
+      
+      console.log('데이터 로드 완료:', checklists.length, '건');
+      return true;
+    } catch (error) {
+      console.error('로드 오류:', error);
+      alert('❌ 데이터 로드 실패: ' + error.message);
+      return false;
+    } finally {
+      isLoading = false;
+    }
+  }
+  
+  // ===== 데이터 저장 =====
+  async function saveData(record) {
+    try {
+      isLoading = true;
+      const { data, error } = await supabase
+        .from('care')
+        .insert([{
+          check_date: record.date,
+          client: record.clientName,
+          worker: record.worker,
+          facility: record.facility,
+          info: {
+            health: record.health,
+            hygiene: record.hygiene,
+            meal: record.meal,
+            daily: record.daily,
+            med: record.med,
+            env: record.env,
+            special: record.special
+          }
+        }])
+        .select();
+      
+      if (error) throw error;
+      
+      alert('✅ 저장 완료!');
+      await loadData();
+      showMenu();
+      return true;
+    } catch (error) {
+      console.error('저장 오류:', error);
+      alert('❌ 저장 실패: ' + error.message);
+      return false;
+    } finally {
+      isLoading = false;
+    }
+  }
+  
+  // ===== 데이터 삭제 =====
+  async function deleteRecord(id) {
+    const numId = Number(id);
+    const record = checklists.find(r => r.id === numId);
+    
+    if (!record) {
+      alert("❌ 기록을 찾을 수 없습니다.");
+      return;
+    }
+    
+    const confirmMsg = `정말 삭제하시겠습니까?\n\n날짜: ${record.date}\n이용자: ${record.clientName}\n담당자: ${record.worker}`;
+    
+    if (!confirm(confirmMsg)) return;
+    
+    try {
+      isLoading = true;
+      const { error } = await supabase
+        .from('care')
+        .delete()
+        .eq('id', numId);
+      
+      if (error) throw error;
+      
+      alert('✅ 삭제 완료');
+      await loadData();
+      search();
+    } catch (error) {
+      console.error('삭제 오류:', error);
+      alert('❌ 삭제 실패: ' + error.message);
+    } finally {
+      isLoading = false;
+    }
+  }
+  
+  // ===== 로그인 화면 =====
+  function showLogin() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+<div class="login-container">
+  <div class="card login-card">
+    <h2>🏥 돌봄 점검 관리</h2>
+    <div class="login-info" style="margin-bottom: 20px;">
+      <p>🔒 보안 강화 버전</p>
+      <p>직원만 접근 가능합니다</p>
+    </div>
+    <input id="email" type="email" placeholder="이메일을 입력하세요" autocomplete="username">
+    <input id="password" type="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password">
+    <button class="btn-blue" id="loginBtn" style="width:100%; margin-top:10px;">
+      <span class="button-icon">🔐</span> 로그인
+    </button>
+  </div>
+</div>`;
+    
+    document.getElementById('password').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') login();
+    });
+    document.getElementById('loginBtn').addEventListener('click', login);
+    
+    setTimeout(() => document.getElementById('email').focus(), 100);
+  }
+  
+  // ===== 로그인 =====
+  async function login() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    
+    if (!email || !password) {
+      alert("⚠️ 이메일과 비밀번호를 입력해주세요.");
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      
+      if (error) throw error;
+      
+      if (data.user) {
+        const metadata = data.user.user_metadata || {};
+        currentUser = {
+          id: data.user.id,
+          email: data.user.email,
+          name: metadata.name || data.user.email,
+          facility: metadata.facility || 'all'
+        };
+        
+        await loadData();
+        showMenu();
+      }
+    } catch (error) {
+      console.error('로그인 오류:', error);
+      alert("❌ 로그인 실패: " + error.message);
+      document.getElementById('password').value = '';
+      document.getElementById('password').focus();
+    }
+  }
+  
+  // ===== 로그아웃 =====
+  async function logout() {
+    if (confirm("🚪 로그아웃 하시겠습니까?")) {
+      try {
+        await supabase.auth.signOut();
+        currentUser = null;
+        showLogin();
+      } catch (error) {
+        console.error('로그아웃 오류:', error);
+        alert('❌ 로그아웃 실패');
+      }
+    }
+  }
+  
+  // ===== 통계 계산 =====
+  function getStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const thisWeekStart = new Date();
+    thisWeekStart.setDate(thisWeekStart.getDate() - 7);
+    const weekStartStr = thisWeekStart.toISOString().split('T')[0];
+    
+    let filteredChecklists = checklists;
+    if (currentUser.facility !== "all") {
+      filteredChecklists = checklists.filter(c => c.facility === currentUser.facility);
+    }
+    
+    const todayCount = filteredChecklists.filter(c => c.date === today).length;
+    const weekCount = filteredChecklists.filter(c => c.date >= weekStartStr).length;
+    const totalCount = filteredChecklists.length;
+    const uniqueClients = new Set(filteredChecklists.map(c => c.clientName)).size;
+    
+    return { todayCount, weekCount, totalCount, uniqueClients };
+  }
+  
+  // ===== 메뉴 화면 =====
+  function showMenu() {
+    const stats = getStats();
+    const app = document.getElementById('app');
+    
+    app.innerHTML = `
+<div class="container">
+  <div class="welcome-banner">
+    <h3>👋 ${currentUser.name}님 환영합니다!</h3>
+    ${currentUser.facility !== "all" ? `<p style="margin-top: 5px; opacity: 0.9;">📍 ${currentUser.facility}</p>` : ''}
+    <p style="margin-top: 10px; opacity: 0.9;">오늘도 좋은 하루 되세요</p>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h4>오늘 작성</h4>
+      <div class="stat-value">${stats.todayCount}</div>
+    </div>
+    <div class="stat-card">
+      <h4>이번 주</h4>
+      <div class="stat-value">${stats.weekCount}</div>
+    </div>
+    <div class="stat-card">
+      <h4>전체 기록</h4>
+      <div class="stat-value">${stats.totalCount}</div>
+    </div>
+    <div class="stat-card">
+      <h4>이용자 수</h4>
+      <div class="stat-value">${stats.uniqueClients}</div>
+    </div>
+  </div>
+  
+  <div class="card">
+    <h3><span class="header-icon">📋</span> 메인 메뉴</h3>
+    <div class="menu-grid">
+      <button class="btn-green" id="checklistBtn">
+        <span class="button-icon">✍️</span> 점검표 작성
+      </button>
+      <button class="btn-blue" id="searchBtn">
+        <span class="button-icon">🔍</span> 기록 조회
+      </button>
+      <button class="btn-red" id="logoutBtn">
+        <span class="button-icon">🚪</span> 로그아웃
+      </button>
+    </div>
+  </div>
+</div>`;
+    
+    document.getElementById('checklistBtn').addEventListener('click', showChecklist);
+    document.getElementById('searchBtn').addEventListener('click', showSearch);
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+  }
+  
+  // ===== 라디오 버튼 생성 =====
+  function radio(label, name) {
+    return `<div class="radio">
+      <span class="radio-label">${label}</span>
+      <label><input type="radio" name="${name}" value="양호" checked> ✅ 양호</label>
+      <label><input type="radio" name="${name}" value="일지"> 📝 일지</label>
+    </div>`;
+  }
+  
+  // ===== 점검표 작성 화면 =====
+  function showChecklist() {
+    const today = new Date().toISOString().split('T')[0];
+    const app = document.getElementById('app');
+    
+    app.innerHTML = `
+<div class="container">
+  <div class="card">
+    <h3><span class="header-icon">✍️</span> 돌봄 점검표 작성</h3>
+    
+    <div class="form-group">
+      <label>📅 점검 날짜 *</label>
+      <input type="date" id="c_date" value="${today}" required>
+    </div>
+    
+    <div class="form-group">
+      <label>👤 이용자명 *</label>
+      <input placeholder="이용자명을 입력하세요" id="c_client" required>
+    </div>
+    
+    <div class="form-group">
+      <label>👨‍⚕️ 작성 직원명 *</label>
+      <input placeholder="직원 이름을 입력하세요" id="c_worker" value="${currentUser.name}" required>
+    </div>
+
+    <div class="section">
+      <b><span class="section-icon">💊</span> 건강 상태</b>
+      <input placeholder="체중 (kg)" id="weight">
+      <input placeholder="혈압 (mmHg)" id="bp">
+      <input placeholder="혈당 (mg/dL)" id="bs">
+    </div>
+
+    <div class="section">
+      <b><span class="section-icon">🧼</span> 위생 관리</b>
+      ${radio("세면", "wash")}
+      ${radio("구강 관리", "dental")}
+      ${radio("머리 정돈", "hair")}
+      ${radio("손발톱 관리", "nail")}
+    </div>
+
+    <div class="section">
+      <b><span class="section-icon">🍽️</span> 식사</b>
+      <input placeholder="식단 메뉴" id="menu">
+      <div class="radio">
+        <span class="radio-label">식사 섭취량</span>
+        <label><input type="radio" name="meal_amount" value="소식"> 🍚 소식</label>
+        <label><input type="radio" name="meal_amount" value="보통" checked> 🍚🍚 보통</label>
+        <label><input type="radio" name="meal_amount" value="과식"> 🍚🍚🍚 과식</label>
+      </div>
+      ${radio("식사 준비 참여", "prep")}
+    </div>
+
+    <div class="section">
+      <b><span class="section-icon">🏠</span> 일상 생활</b>
+      ${radio("역할 활동", "role")}
+      ${radio("침구 정돈", "bed")}
+      ${radio("의복 관리", "cloth")}
+      ${radio("대화", "conv")}
+    </div>
+
+    <div class="section">
+      <b><span class="section-icon">💉</span> 투약 관리</b>
+      <div class="radio">
+        <span class="radio-label">아침 투약</span>
+        <label><input type="radio" name="med_m" value="양호" checked> ✅ 양호</label>
+        <label><input type="radio" name="med_m" value="없음"> ❌ 없음</label>
+      </div>
+      <div class="radio">
+        <span class="radio-label">점심 투약</span>
+        <label><input type="radio" name="med_a" value="양호" checked> ✅ 양호</label>
+        <label><input type="radio" name="med_a" value="없음"> ❌ 없음</label>
+      </div>
+      <div class="radio">
+        <span class="radio-label">저녁 투약</span>
+        <label><input type="radio" name="med_e" value="양호" checked> ✅ 양호</label>
+        <label><input type="radio" name="med_e" value="없음"> ❌ 없음</label>
+      </div>
+    </div>
+
+    <div class="section">
+      <b><span class="section-icon">🌿</span> 환경 관리</b>
+      ${radio("청소", "clean")}
+      ${radio("환기", "vent")}
+      ${radio("온도", "temp")}
+      ${radio("안전", "safe")}
+    </div>
+
+    <div class="form-group">
+      <label>📝 특이사항</label>
+      <textarea id="special" placeholder="특이사항이 있으면 입력하세요"></textarea>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn-green" id="saveBtn">
+        <span class="button-icon">💾</span> 저장
+      </button>
+      <button class="btn-gray" id="cancelBtn">
+        <span class="button-icon">↩️</span> 취소
+      </button>
+    </div>
+  </div>
+</div>`;
+    
+    document.getElementById('saveBtn').addEventListener('click', saveChecklist);
+    document.getElementById('cancelBtn').addEventListener('click', showMenu);
+    
+    setTimeout(() => document.getElementById('c_client').focus(), 100);
+  }
+  
+  // ===== 점검표 저장 =====
+  async function saveChecklist() {
+    function getRadioValue(name) {
+      const elem = document.querySelector(`input[name="${name}"]:checked`);
+      return elem ? elem.value : "양호";
+    }
+    
+    const date = document.getElementById('c_date').value;
+    const clientName = document.getElementById('c_client').value.trim();
+    const workerName = document.getElementById('c_worker').value.trim();
+    
+    if (!date) {
+      alert("⚠️ 점검 날짜를 선택해주세요.");
+      document.getElementById('c_date').focus();
+      return;
+    }
+    
+    if (!clientName) {
+      alert("⚠️ 이용자명을 입력해주세요.");
+      document.getElementById('c_client').focus();
+      return;
+    }
+    
+    if (!workerName) {
+      alert("⚠️ 작성 직원명을 입력해주세요.");
+      document.getElementById('c_worker').focus();
+      return;
+    }
+    
+    const newRecord = {
+      id: Date.now(),
+      date: date,
+      clientName: clientName,
+      worker: workerName,
+      facility: currentUser.facility,
+      createdAt: new Date().toISOString(),
+      health: {
+        weight: document.getElementById('weight').value.trim(),
+        bp: document.getElementById('bp').value.trim(),
+        bs: document.getElementById('bs').value.trim()
+      },
+      hygiene: {
+        wash: getRadioValue("wash"),
+        dental: getRadioValue("dental"),
+        hair: getRadioValue("hair"),
+        nail: getRadioValue("nail")
+      },
+      meal: {
+        menu: document.getElementById('menu').value.trim(),
+        amount: getRadioValue("meal_amount"),
+        prep: getRadioValue("prep")
+      },
+      daily: {
+        role: getRadioValue("role"),
+        bed: getRadioValue("bed"),
+        cloth: getRadioValue("cloth"),
+        conv: getRadioValue("conv")
+      },
+      med: {
+        m: getRadioValue("med_m"),
+        a: getRadioValue("med_a"),
+        e: getRadioValue("med_e")
+      },
+      env: {
+        clean: getRadioValue("clean"),
+        vent: getRadioValue("vent"),
+        temp: getRadioValue("temp"),
+        safe: getRadioValue("safe")
+      },
+      special: document.getElementById('special').value.trim()
+    };
+    
+    await saveData(newRecord);
+  }
+  
+  // ===== 카테고리 요약 =====
+  function summaryCategory(obj) {
+    const good = [];
+    const log = [];
+    const none = [];
+    const name = {
+      wash: "세면", dental: "구강관리", hair: "머리정돈", nail: "손발톱관리",
+      prep: "식사준비", role: "역할활동", bed: "침구정돈", cloth: "의복관리", conv: "대화",
+      clean: "청소", vent: "환기", temp: "온도", safe: "안전", m: "아침", a: "점심", e: "저녁"
+    };
+    
+    for (let k in obj) {
+      if (obj[k] === "양호") good.push(name[k]);
+      if (obj[k] === "일지") log.push(name[k]);
+      if (obj[k] === "없음") none.push(name[k]);
+    }
+    
+    let result = `✅ 양호: ${good.join(", ") || "없음"}`;
+    if (log.length > 0) result += ` / 📝 일지: ${log.join(", ")}`;
+    if (none.length > 0) result += ` / ❌ 없음: ${none.join(", ")}`;
+    
+    return result;
+  }
+  
+  // ===== 기록 조회 화면 =====
+  async function showSearch() {
+    const today = new Date();
+    const past = new Date();
+    past.setDate(today.getDate() - 7);
+    
+    const app = document.getElementById('app');
+    app.innerHTML = `
+<div class="container">
+  <div class="card">
+    <h3><span class="header-icon">🔍</span> 기록 조회</h3>
+
+    <div class="search-form">
+      <div class="form-group">
+        <label>👤 이용자명</label>
+        <input id="searchClient" placeholder="전체">
+      </div>
+      <div class="form-group">
+        <label>📅 시작일</label>
+        <input type="date" id="startDate" value="${past.toISOString().split('T')[0]}">
+      </div>
+      <div class="form-group">
+        <label>📅 종료일</label>
+        <input type="date" id="endDate" value="${today.toISOString().split('T')[0]}">
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn-blue" id="refreshBtn">
+        <span class="button-icon">🔄</span> 새로고침 & 조회
+      </button>
+      <button class="btn-green" id="pdfBtn">
+        <span class="button-icon">📄</span> PDF 저장
+      </button>
+      <button class="btn-gray" id="backBtn">
+        <span class="button-icon">↩️</span> 뒤로
+      </button>
+    </div>
+
+    <div id="result"></div>
+  </div>
+</div>`;
+    
+    document.getElementById('refreshBtn').addEventListener('click', refreshAndSearch);
+    document.getElementById('pdfBtn').addEventListener('click', savePDF);
+    document.getElementById('backBtn').addEventListener('click', showMenu);
+    
+    await loadData();
+    search();
+  }
+  
+  // ===== 새로고침 & 조회 =====
+  async function refreshAndSearch() {
+    await loadData();
+    search();
+  }
+  
+  // ===== 검색 실행 =====
+  function search() {
+    const clientName = document.getElementById('searchClient').value.trim();
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    let filtered = checklists.filter(record => {
+      const matchFacility = currentUser.facility === "all" || record.facility === currentUser.facility;
+      const matchClient = !clientName || record.clientName.includes(clientName);
+      const matchStart = !startDate || record.date >= startDate;
+      const matchEnd = !endDate || record.date <= endDate;
+      return matchFacility && matchClient && matchStart && matchEnd;
+    });
+
+    if (filtered.length === 0) {
+      document.getElementById('result').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📭</div>
+          <h3>검색 결과가 없습니다</h3>
+          <p>다른 조건으로 검색해보세요.</p>
+        </div>
+      `;
+      return;
+    }
+
+    filtered.sort((a, b) => {
+      if (b.date !== a.date) return b.date.localeCompare(a.date);
+      return b.id - a.id;
+    });
+
+    let html = `
+      <div style="margin-bottom: 10px; color: #6b7280;">
+        📊 총 <strong style="color: #667eea;">${filtered.length}건</strong>의 기록이 조회되었습니다.
+      </div>
+      <table>
+        <tr>
+          <th style="width: 100px;">날짜</th>
+          <th style="width: 100px;">이용자</th>
+          <th style="width: 80px;">담당자</th>
+          <th>상세 내용</th>
+          <th style="width: 80px;">관리</th>
+        </tr>`;
+    
+    filtered.forEach(record => {
+      html += `
+      <tr>
+        <td style="text-align:center; white-space:nowrap; font-weight: 600;">${record.date}</td>
+        <td style="text-align:center; font-weight:600; color: #667eea;">${record.clientName}</td>
+        <td style="text-align:center;">${record.worker}</td>
+        <td>
+          <div style="line-height:1.9; font-size: 13px;">
+            ${record.health.weight || record.health.bp || record.health.bs ? 
+              `<div style="margin-bottom: 8px;"><strong>💊 건강:</strong> 체중 ${record.health.weight || '-'} | 혈압 ${record.health.bp || '-'} | 혈당 ${record.health.bs || '-'}</div>` : ''}
+            ${record.meal.menu ? 
+              `<div style="margin-bottom: 8px;"><strong>🍽️ 식사:</strong> ${record.meal.menu} (섭취량: ${record.meal.amount})</div>` : ''}
+            <div style="margin-bottom: 5px;"><strong>🧼 위생:</strong> ${summaryCategory(record.hygiene)}</div>
+            <div style="margin-bottom: 5px;"><strong>🏠 일상:</strong> ${summaryCategory(record.daily)}</div>
+            <div style="margin-bottom: 5px;"><strong>💉 투약:</strong> ${summaryCategory(record.med)}</div>
+            <div style="margin-bottom: 5px;"><strong>🌿 환경:</strong> ${summaryCategory(record.env)}</div>
+            ${record.special ? 
+              `<div style="margin-top: 10px; padding: 10px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px;">
+                <strong style="color: #92400e;">📌 특이사항:</strong> ${record.special}
+              </div>` : ''}
+          </div>
+        </td>
+        <td style="text-align:center;">
+          <button class="btn-red delete-btn" data-id="${record.id}" style="padding: 8px 12px; margin: 0;">
+            🗑️ 삭제
+          </button>
+        </td>
+      </tr>`;
+    });
+    
+    html += "</table>";
+    document.getElementById('result').innerHTML = html;
+    
+    // 삭제 버튼 이벤트 리스너 추가
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = e.currentTarget.getAttribute('data-id');
+        deleteRecord(id);
+      });
+    });
+  }
+  
+  // ===== PDF 저장 =====
+  async function savePDF() {
+    const resultDiv = document.getElementById('result');
+    if (!resultDiv || !resultDiv.querySelector('table')) {
+      alert('⚠️ 조회된 결과가 없습니다. 먼저 조회 버튼을 눌러주세요.');
+      return;
+    }
+    
+    if (typeof jspdf === 'undefined' || typeof html2canvas === 'undefined') {
+      alert('⚠️ PDF 라이브러리를 로딩하는 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+    
+    const { jsPDF } = jspdf;
+    
+    const searchClient = document.getElementById('searchClient').value.trim();
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    let filtered = checklists.filter(record => {
+      const matchFacility = currentUser.facility === "all" || record.facility === currentUser.facility;
+      const matchClient = !searchClient || record.clientName.includes(searchClient);
+      const matchStart = !startDate || record.date >= startDate;
+      const matchEnd = !endDate || record.date <= endDate;
+      return matchFacility && matchClient && matchStart && matchEnd;
+    });
+    
+    filtered.sort((a, b) => {
+      if (b.date !== a.date) return b.date.localeCompare(a.date);
+      return b.id - a.id;
+    });
+    
+    if (filtered.length === 0) {
+      alert('⚠️ 저장할 데이터가 없습니다.');
+      return;
+    }
+    
+    const pdfContainer = document.createElement('div');
+    pdfContainer.style.cssText = `
+      position: absolute;
+      left: -9999px;
+      width: 800px;
+      background: white;
+      padding: 40px;
+      font-family: 'Malgun Gothic', Arial, sans-serif;
+    `;
+    
+    let htmlContent = `
+      <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 20px;">
+        <h1 style="color: #1f2937; font-size: 32px; margin: 0;">돌봄 점검 기록</h1>
+        <p style="color: #6b7280; margin-top: 15px; font-size: 16px;">조회 기간: ${startDate} ~ ${endDate}</p>
+        ${searchClient ? `<p style="color: #6b7280; margin-top: 5px; font-size: 16px;">이용자: ${searchClient}</p>` : ''}
+        <p style="color: #6b7280; margin-top: 5px; font-size: 14px;">총 ${filtered.length}건의 기록</p>
+      </div>
+    `;
+    
+    filtered.forEach((record, index) => {
+      htmlContent += `
+        <div style="margin-bottom: 25px; border: 2px solid #667eea; border-radius: 8px; padding: 20px; page-break-inside: avoid; background: #fafafa;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+            <strong style="font-size: 18px;">${record.date} | ${record.clientName}</strong>
+            <span style="float: right; font-size: 14px;">담당: ${record.worker}</span>
+          </div>
+          
+          ${record.health.weight || record.health.bp || record.health.bs ? `
+          <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 6px;">
+            <strong style="color: #1f2937; font-size: 15px;">💊 건강 상태:</strong>
+            <span style="color: #4b5563; margin-left: 10px;">
+              체중 ${record.health.weight || '-'} | 
+              혈압 ${record.health.bp || '-'} | 
+              혈당 ${record.health.bs || '-'}
+            </span>
+          </div>
+          ` : ''}
+          
+          ${record.meal.menu ? `
+          <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 6px;">
+            <strong style="color: #1f2937; font-size: 15px;">🍽️ 식사:</strong>
+            <span style="color: #4b5563; margin-left: 10px;">
+              ${record.meal.menu} (섭취량: ${record.meal.amount})
+            </span>
+          </div>
+          ` : ''}
+          
+          <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px;">
+            <strong style="color: #1f2937; font-size: 14px;">🧼 위생:</strong>
+            <div style="color: #4b5563; margin-top: 5px; font-size: 13px;">${summaryCategory(record.hygiene)}</div>
+          </div>
+          
+          <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px;">
+            <strong style="color: #1f2937; font-size: 14px;">🏠 일상:</strong>
+            <div style="color: #4b5563; margin-top: 5px; font-size: 13px;">${summaryCategory(record.daily)}</div>
+          </div>
+          
+          <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px;">
+            <strong style="color: #1f2937; font-size: 14px;">💉 투약:</strong>
+            <div style="color: #4b5563; margin-top: 5px; font-size: 13px;">${summaryCategory(record.med)}</div>
+          </div>
+          
+          <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px;">
+            <strong style="color: #1f2937; font-size: 14px;">🌿 환경:</strong>
+            <div style="color: #4b5563; margin-top: 5px; font-size: 13px;">${summaryCategory(record.env)}</div>
+          </div>
+          
+          ${record.special ? `
+          <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px;">
+            <strong style="color: #92400e; font-size: 14px;">📌 특이사항:</strong>
+            <p style="color: #78350f; margin: 8px 0 0 0; line-height: 1.6;">${record.special}</p>
+          </div>
+          ` : ''}
+        </div>
+      `;
+    });
+    
+    pdfContainer.innerHTML = htmlContent;
+    document.body.appendChild(pdfContainer);
+    
+    try {
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(btn => btn.disabled = true);
+      
+      const canvas = await html2canvas(pdfContainer, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const imgWidth = 210;
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      let position = 0;
+      
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      
+      const fileName = `돌봄점검기록_${searchClient || '전체'}_${startDate}_${endDate}.pdf`;
+      pdf.save(fileName);
+      
+      buttons.forEach(btn => btn.disabled = false);
+      alert('✅ PDF 파일이 다운로드되었습니다!');
+      
+    } catch (error) {
+      console.error('PDF 생성 오류:', error);
+      alert('❌ PDF 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
+      
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(btn => btn.disabled = false);
+      
+    } finally {
+      if (document.body.contains(pdfContainer)) {
+        document.body.removeChild(pdfContainer);
+      }
+    }
+  }
+  
+  // ===== 초기화 =====
+  async function init() {
+    try {
+      // Supabase 초기화
+      if (!initSupabase()) {
+        document.getElementById('app').innerHTML = `
+          <div class="container">
+            <div class="card">
+              <h2>❌ 오류</h2>
+              <p style="text-align: center; color: #dc2626; margin-top: 20px;">
+                Supabase 초기화에 실패했습니다.<br>
+                페이지를 새로고침하거나 관리자에게 문의하세요.
+              </p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      // 세션 확인
+      const hasSession = await checkSession();
+      if (hasSession) {
+        await loadData();
+        showMenu();
+      } else {
+        showLogin();
+      }
+    } catch (error) {
+      console.error('초기화 오류:', error);
+      document.getElementById('app').innerHTML = `
+        <div class="container">
+          <div class="card">
+            <h2>❌ 오류</h2>
+            <p style="text-align: center; color: #dc2626; margin-top: 20px;">
+              시스템 초기화 중 오류가 발생했습니다.<br>
+              페이지를 새로고침하거나 관리자에게 문의하세요.
+            </p>
+          </div>
+        </div>
+      `;
+    }
+  }
+  
+  // ===== 에러 핸들링 =====
+  window.onerror = function(msg, url, line) {
+    console.error('전역 오류:', msg, url, line);
+    return false;
+  };
+  
+  // ===== 페이지 로드 시 실행 =====
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  
+})();
+</script>
+</body>
+</html>
