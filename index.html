@@ -7,6 +7,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// Supabase 설정
+const SUPABASE_URL = 'https://nogzefpmsenbcxqlnmjl.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vZ3plZnBtc2VuYmN4cWxubWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMjMwNzQsImV4cCI6MjA4NTY5OTA3NH0.3N_AbsD0ovXR1c-GXsQ4dfsfJ1ZQXOziCL14MGb3amE';
+</script>
 <style>
 * {
   box-sizing: border-box;
@@ -275,6 +280,24 @@ tr:hover td {
   margin: 5px 0;
 }
 
+.login-toggle {
+  text-align: center;
+  margin-top: 15px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.login-toggle a {
+  color: #667eea;
+  cursor: pointer;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.login-toggle a:hover {
+  color: #5568d3;
+}
+
 /* 메뉴 화면 */
 .menu-grid {
   display: grid;
@@ -461,10 +484,6 @@ tr:hover td {
   let checklists = [];
   let isLoading = false;
   
-  // ===== Supabase 설정 =====
-  const SUPABASE_URL = 'https://nogzefpmsenbcxqlnmjl.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vZ3plZnBtc2VuYmN4cWxubWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMjMwNzQsImV4cCI6MjA4NTY5OTA3NH0.3N_AbsD0ovXR1c-GXsQ4dfsfJ1ZQXOziCL14MGb3amE';
-  
   // ===== Supabase 초기화 =====
   function initSupabase() {
     try {
@@ -489,7 +508,6 @@ tr:hover td {
       if (error) throw error;
       
       if (session && session.user) {
-        // 세션이 있으면 사용자 정보 설정
         const metadata = session.user.user_metadata || {};
         currentUser = {
           id: session.user.id,
@@ -548,6 +566,9 @@ tr:hover td {
   async function saveData(record) {
     try {
       isLoading = true;
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase
         .from('care')
         .insert([{
@@ -555,6 +576,7 @@ tr:hover td {
           client: record.clientName,
           worker: record.worker,
           facility: record.facility,
+          user_id: user?.id,
           info: {
             health: record.health,
             hygiene: record.hygiene,
@@ -632,6 +654,9 @@ tr:hover td {
     <button class="btn-blue" id="loginBtn" style="width:100%; margin-top:10px;">
       <span class="button-icon">🔐</span> 로그인
     </button>
+    <div class="login-toggle">
+      계정이 없으신가요? <a id="showSignupLink">회원가입</a>
+    </div>
   </div>
 </div>`;
     
@@ -639,8 +664,107 @@ tr:hover td {
       if (e.key === 'Enter') login();
     });
     document.getElementById('loginBtn').addEventListener('click', login);
+    document.getElementById('showSignupLink').addEventListener('click', showSignup);
     
     setTimeout(() => document.getElementById('email').focus(), 100);
+  }
+  
+  // ===== 회원가입 화면 =====
+  function showSignup() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+<div class="login-container">
+  <div class="card login-card">
+    <h2>📝 회원가입</h2>
+    <div class="form-group">
+      <label>👤 이름</label>
+      <input id="signupName" type="text" placeholder="이름을 입력하세요" required>
+    </div>
+    <div class="form-group">
+      <label>📧 이메일</label>
+      <input id="signupEmail" type="email" placeholder="이메일을 입력하세요" autocomplete="username" required>
+    </div>
+    <div class="form-group">
+      <label>🔒 비밀번호</label>
+      <input id="signupPassword" type="password" placeholder="비밀번호를 입력하세요 (최소 6자)" autocomplete="new-password" required>
+    </div>
+    <div class="form-group">
+      <label>🏢 소속 시설</label>
+      <select id="signupFacility" required>
+        <option value="">선택하세요</option>
+        <option value="all">전체 (관리자)</option>
+        <option value="A동">A동</option>
+        <option value="B동">B동</option>
+        <option value="C동">C동</option>
+      </select>
+    </div>
+    <button class="btn-green" id="signupBtn" style="width:100%; margin-top:10px;">
+      <span class="button-icon">✅</span> 가입하기
+    </button>
+    <button class="btn-gray" id="backToLoginBtn" style="width:100%; margin-top:5px;">
+      <span class="button-icon">↩️</span> 로그인으로 돌아가기
+    </button>
+  </div>
+</div>`;
+    
+    document.getElementById('signupBtn').addEventListener('click', signup);
+    document.getElementById('backToLoginBtn').addEventListener('click', showLogin);
+    
+    setTimeout(() => document.getElementById('signupName').focus(), 100);
+  }
+  
+  // ===== 회원가입 =====
+  async function signup() {
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const facility = document.getElementById('signupFacility').value;
+    
+    if (!name) {
+      alert("⚠️ 이름을 입력해주세요.");
+      document.getElementById('signupName').focus();
+      return;
+    }
+    
+    if (!email) {
+      alert("⚠️ 이메일을 입력해주세요.");
+      document.getElementById('signupEmail').focus();
+      return;
+    }
+    
+    if (!password || password.length < 6) {
+      alert("⚠️ 비밀번호는 최소 6자 이상이어야 합니다.");
+      document.getElementById('signupPassword').focus();
+      return;
+    }
+    
+    if (!facility) {
+      alert("⚠️ 소속 시설을 선택해주세요.");
+      document.getElementById('signupFacility').focus();
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            name: name,
+            facility: facility
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      alert("✅ 회원가입이 완료되었습니다!\n\n이메일 인증을 확인한 후 로그인해주세요.");
+      showLogin();
+      
+    } catch (error) {
+      console.error('회원가입 오류:', error);
+      alert("❌ 회원가입 실패: " + error.message);
+    }
   }
   
   // ===== 로그인 =====
@@ -724,7 +848,7 @@ tr:hover td {
 <div class="container">
   <div class="welcome-banner">
     <h3>👋 ${currentUser.name}님 환영합니다!</h3>
-    ${currentUser.facility !== "all" ? `<p style="margin-top: 5px; opacity: 0.9;">📍 ${currentUser.facility}</p>` : ''}
+    ${currentUser.facility !== "all" ? `<p style="margin-top: 5px; opacity: 0.9;">📍 ${currentUser.facility}</p>` : '<p style="margin-top: 5px; opacity: 0.9;">📍 전체 시설 관리자</p>'}
     <p style="margin-top: 10px; opacity: 0.9;">오늘도 좋은 하루 되세요</p>
   </div>
   
@@ -1118,7 +1242,6 @@ tr:hover td {
     html += "</table>";
     document.getElementById('result').innerHTML = html;
     
-    // 삭제 버튼 이벤트 리스너 추가
     document.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const id = e.currentTarget.getAttribute('data-id');
@@ -1297,7 +1420,6 @@ tr:hover td {
   // ===== 초기화 =====
   async function init() {
     try {
-      // Supabase 초기화
       if (!initSupabase()) {
         document.getElementById('app').innerHTML = `
           <div class="container">
@@ -1313,7 +1435,6 @@ tr:hover td {
         return;
       }
       
-      // 세션 확인
       const hasSession = await checkSession();
       if (hasSession) {
         await loadData();
@@ -1337,13 +1458,11 @@ tr:hover td {
     }
   }
   
-  // ===== 에러 핸들링 =====
   window.onerror = function(msg, url, line) {
     console.error('전역 오류:', msg, url, line);
     return false;
   };
   
-  // ===== 페이지 로드 시 실행 =====
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
@@ -1353,5 +1472,6 @@ tr:hover td {
 })();
 </script>
 </body>
-
 </html>
+
+
