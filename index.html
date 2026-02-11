@@ -280,23 +280,6 @@ tr:hover td {
   margin: 5px 0;
 }
 
-.login-toggle {
-  text-align: center;
-  margin-top: 15px;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.login-toggle a {
-  color: #667eea;
-  cursor: pointer;
-  text-decoration: underline;
-  font-weight: 500;
-}
-
-.login-toggle a:hover {
-  color: #5568d3;
-}
 
 /* 메뉴 화면 */
 .menu-grid {
@@ -654,9 +637,6 @@ tr:hover td {
     <button class="btn-blue" id="loginBtn" style="width:100%; margin-top:10px;">
       <span class="button-icon">🔐</span> 로그인
     </button>
-    <div class="login-toggle">
-      계정이 없으신가요? <a id="showSignupLink">회원가입</a>
-    </div>
   </div>
 </div>`;
     
@@ -664,109 +644,14 @@ tr:hover td {
       if (e.key === 'Enter') login();
     });
     document.getElementById('loginBtn').addEventListener('click', login);
-    document.getElementById('showSignupLink').addEventListener('click', showSignup);
     
     setTimeout(() => document.getElementById('email').focus(), 100);
   }
   
-  // ===== 회원가입 화면 =====
-  function showSignup() {
-    const app = document.getElementById('app');
-    app.innerHTML = `
-<div class="login-container">
-  <div class="card login-card">
-    <h2>📝 회원가입</h2>
-    <div class="form-group">
-      <label>👤 이름</label>
-      <input id="signupName" type="text" placeholder="이름을 입력하세요" required>
-    </div>
-    <div class="form-group">
-      <label>📧 이메일</label>
-      <input id="signupEmail" type="email" placeholder="이메일을 입력하세요" autocomplete="username" required>
-    </div>
-    <div class="form-group">
-      <label>🔒 비밀번호</label>
-      <input id="signupPassword" type="password" placeholder="비밀번호를 입력하세요 (최소 6자)" autocomplete="new-password" required>
-    </div>
-    <div class="form-group">
-      <label>🏢 소속 시설</label>
-      <select id="signupFacility" required>
-        <option value="">선택하세요</option>
-        <option value="all">전체 (관리자)</option>
-        <option value="A동">A동</option>
-        <option value="B동">B동</option>
-        <option value="C동">C동</option>
-      </select>
-    </div>
-    <button class="btn-green" id="signupBtn" style="width:100%; margin-top:10px;">
-      <span class="button-icon">✅</span> 가입하기
-    </button>
-    <button class="btn-gray" id="backToLoginBtn" style="width:100%; margin-top:5px;">
-      <span class="button-icon">↩️</span> 로그인으로 돌아가기
-    </button>
-  </div>
-</div>`;
-    
-    document.getElementById('signupBtn').addEventListener('click', signup);
-    document.getElementById('backToLoginBtn').addEventListener('click', showLogin);
-    
-    setTimeout(() => document.getElementById('signupName').focus(), 100);
-  }
   
-  // ===== 회원가입 =====
-  async function signup() {
-    const name = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value;
-    const facility = document.getElementById('signupFacility').value;
-    
-    if (!name) {
-      alert("⚠️ 이름을 입력해주세요.");
-      document.getElementById('signupName').focus();
-      return;
-    }
-    
-    if (!email) {
-      alert("⚠️ 이메일을 입력해주세요.");
-      document.getElementById('signupEmail').focus();
-      return;
-    }
-    
-    if (!password || password.length < 6) {
-      alert("⚠️ 비밀번호는 최소 6자 이상이어야 합니다.");
-      document.getElementById('signupPassword').focus();
-      return;
-    }
-    
-    if (!facility) {
-      alert("⚠️ 소속 시설을 선택해주세요.");
-      document.getElementById('signupFacility').focus();
-      return;
-    }
-    
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            name: name,
-            facility: facility
-          }
-        }
-      });
-      
-      if (error) throw error;
-      
-      alert("✅ 회원가입이 완료되었습니다!\n\n이메일 인증을 확인한 후 로그인해주세요.");
-      showLogin();
-      
-    } catch (error) {
-      console.error('회원가입 오류:', error);
-      alert("❌ 회원가입 실패: " + error.message);
-    }
-  }
+
   
+
   // ===== 로그인 =====
   async function login() {
     const email = document.getElementById('email').value.trim();
@@ -997,15 +882,15 @@ tr:hover td {
       <button class="btn-green" id="saveBtn">
         <span class="button-icon">💾</span> 저장
       </button>
-      <button class="btn-gray" id="cancelBtn">
-        <span class="button-icon">↩️</span> 취소
+      <button class="btn-blue" id="nextBtn">
+        <span class="button-icon">➡️</span> 다음
       </button>
     </div>
   </div>
 </div>`;
     
     document.getElementById('saveBtn').addEventListener('click', saveChecklist);
-    document.getElementById('cancelBtn').addEventListener('click', showMenu);
+    document.getElementById('nextBtn').addEventListener('click', showMenu);
     
     setTimeout(() => document.getElementById('c_client').focus(), 100);
   }
@@ -1473,5 +1358,3 @@ tr:hover td {
 </script>
 </body>
 </html>
-
-
