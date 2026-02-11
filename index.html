@@ -629,7 +629,6 @@ tr:hover td {
   <div class="card login-card">
     <h2>🏥 돌봄 점검 관리</h2>
     <div class="login-info" style="margin-bottom: 20px;">
-      <p>🔒 보안 강화 버전</p>
       <p>직원만 접근 가능합니다</p>
     </div>
     <input id="email" type="email" placeholder="이메일을 입력하세요" autocomplete="username">
@@ -821,14 +820,14 @@ tr:hover td {
     <div class="section">
       <b><span class="section-icon">🧼</span> 위생 관리</b>
       ${radio("세면", "wash")}
-      ${radio("구강 관리", "dental")}
-      ${radio("머리 정돈", "hair")}
-      ${radio("손발톱 관리", "nail")}
+      ${radio("구강", "dental")}
+      ${radio("머리", "hair")}
+      ${radio("손발톱", "nail")}
     </div>
 
     <div class="section">
       <b><span class="section-icon">🍽️</span> 식사</b>
-      <input placeholder="식단 메뉴" id="menu">
+      <input placeholder="식단 욕구" id="menu">
       <div class="radio">
         <span class="radio-label">식사 섭취량</span>
         <label><input type="radio" name="meal_amount" value="소식"> 🍚 소식</label>
@@ -841,8 +840,8 @@ tr:hover td {
     <div class="section">
       <b><span class="section-icon">🏠</span> 일상 생활</b>
       ${radio("역할 활동", "role")}
-      ${radio("침구 정돈", "bed")}
-      ${radio("의복 관리", "cloth")}
+      ${radio("침구 청결", "bed")}
+      ${radio("의복 정리", "cloth")}
       ${radio("대화", "conv")}
     </div>
 
@@ -866,11 +865,11 @@ tr:hover td {
     </div>
 
     <div class="section">
-      <b><span class="section-icon">🌿</span> 환경 관리</b>
-      ${radio("청소", "clean")}
-      ${radio("환기", "vent")}
-      ${radio("온도", "temp")}
-      ${radio("안전", "safe")}
+      <b><span class="section-icon">✨</span> 외모 꾸밈</b>
+      ${radio("화장", "makeup")}
+      ${radio("의복", "clothes")}
+      ${radio("가방", "bag")}
+      ${radio("신발", "shoes")}
     </div>
 
     <div class="form-group">
@@ -977,12 +976,12 @@ tr:hover td {
     const none = [];
     const name = {
       wash: "세면", dental: "구강관리", hair: "머리정돈", nail: "손발톱관리",
-      prep: "식사준비", role: "역할활동", bed: "침구정돈", cloth: "의복관리", conv: "대화",
-      clean: "청소", vent: "환기", temp: "온도", safe: "안전", m: "아침", a: "점심", e: "저녁"
+      prep: "식사준비", role: "역할활동", bed: "침구정돈", cloth: "의복정리", conv: "대화",
+      Grooming: "화장", vent: "의복", temp: "가방", safe: "신발", m: "아침", a: "점심", e: "저녁"
     };
     
     for (let k in obj) {
-      if (obj[k] === "양호") good.push(name[k]);
+      if (obj[k] === "양호") good.push(name[k])
       if (obj[k] === "일지") log.push(name[k]);
       if (obj[k] === "없음") none.push(name[k]);
     }
@@ -1109,7 +1108,7 @@ tr:hover td {
             <div style="margin-bottom: 5px;"><strong>🧼 위생:</strong> ${summaryCategory(record.hygiene)}</div>
             <div style="margin-bottom: 5px;"><strong>🏠 일상:</strong> ${summaryCategory(record.daily)}</div>
             <div style="margin-bottom: 5px;"><strong>💉 투약:</strong> ${summaryCategory(record.med)}</div>
-            <div style="margin-bottom: 5px;"><strong>🌿 환경:</strong> ${summaryCategory(record.env)}</div>
+            <div style="margin-bottom: 5px;"><strong>✨ 외모:</strong> ${summaryCategory(record.env)}</div>
             ${record.special ? 
               `<div style="margin-top: 10px; padding: 10px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px;">
                 <strong style="color: #92400e;">📌 특이사항:</strong> ${record.special}
@@ -1235,7 +1234,7 @@ tr:hover td {
           </div>
           
           <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px;">
-            <strong style="color: #1f2937; font-size: 14px;">🌿 환경:</strong>
+            <strong style="color: #1f2937; font-size: 14px;">✨ 외모:</strong>
             <div style="color: #4b5563; margin-top: 5px; font-size: 13px;">${summaryCategory(record.env)}</div>
           </div>
           
@@ -1358,3 +1357,4 @@ tr:hover td {
 </script>
 </body>
 </html>
+
