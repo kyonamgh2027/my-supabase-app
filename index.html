@@ -73,7 +73,6 @@ h3 {
   font-size: 32px;
 }
 
-/* 버튼 스타일 */
 button {
   padding: 12px 24px;
   border: none;
@@ -135,7 +134,6 @@ button:disabled {
   background: #d1d5db;
 }
 
-/* 입력 필드 */
 input, select, textarea {
   width: 100%;
   padding: 12px 16px;
@@ -158,7 +156,6 @@ textarea {
   resize: vertical;
 }
 
-/* 섹션 */
 .section {
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
   padding: 20px;
@@ -181,7 +178,6 @@ textarea {
   font-size: 22px;
 }
 
-/* 라디오 버튼 */
 .radio {
   margin: 10px 0;
   padding: 10px;
@@ -219,7 +215,6 @@ textarea {
   cursor: pointer;
 }
 
-/* 테이블 */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -249,7 +244,6 @@ tr:hover td {
   background: #f9fafb;
 }
 
-/* 로그인 화면 */
 .login-container {
   display: flex;
   justify-content: center;
@@ -280,8 +274,6 @@ tr:hover td {
   margin: 5px 0;
 }
 
-
-/* 메뉴 화면 */
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -303,7 +295,6 @@ tr:hover td {
   font-size: 24px;
 }
 
-/* 검색 폼 */
 .search-form {
   background: #f9fafb;
   padding: 20px;
@@ -335,7 +326,6 @@ tr:hover td {
   margin-top: 20px;
 }
 
-/* 빈 상태 */
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -363,7 +353,6 @@ tr:hover td {
   justify-content: center;
 }
 
-/* 통계 카드 */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -392,14 +381,12 @@ tr:hover td {
   color: #1f2937;
 }
 
-/* 로딩 */
 .loading {
   text-align: center;
   padding: 40px;
   color: white;
 }
 
-/* 반응형 */
 @media (max-width: 768px) {
   .card {
     padding: 20px;
@@ -427,7 +414,6 @@ tr:hover td {
   }
 }
 
-/* 인쇄 스타일 */
 @media print {
   body {
     background: white;
@@ -461,13 +447,11 @@ tr:hover td {
 (function() {
   'use strict';
   
-  // ===== 전역 변수 =====
   let supabase = null;
   let currentUser = null;
   let checklists = [];
   let isLoading = false;
   
-  // ===== Supabase 초기화 =====
   function initSupabase() {
     try {
       if (typeof window.supabase === 'undefined') {
@@ -483,7 +467,6 @@ tr:hover td {
     }
   }
   
-  // ===== 세션 확인 =====
   async function checkSession() {
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
@@ -491,13 +474,42 @@ tr:hover td {
       if (error) throw error;
       
       if (session && session.user) {
-        const metadata = session.user.user_metadata || {};
-        currentUser = {
-          id: session.user.id,
-          email: session.user.email,
-          name: metadata.name || session.user.email,
-          facility: metadata.facility || 'all'
-        };
+        const { data: userProfile, error: profileError } = await supabase
+          .from('users')
+          .select(`
+            id,
+            email,
+            name,
+            role,
+            facility_id,
+            facilities (
+              name
+            )
+          `)
+          .eq('id', session.user.id)
+          .single();
+        
+        if (profileError) {
+          console.warn('프로필 정보 로드 실패:', profileError);
+          currentUser = {
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.email,
+            facility: null,
+            role: 'staff'
+          };
+        } else {
+          currentUser = {
+            id: userProfile.id,
+            email: userProfile.email,
+            name: userProfile.name || userProfile.email,
+            facility: userProfile.facilities?.name || null,
+            facilityId: userProfile.facility_id,
+            role: userProfile.role || 'staff'
+          };
+        }
+        
+        console.log('로그인 사용자:', currentUser);
         return true;
       }
       return false;
@@ -507,7 +519,6 @@ tr:hover td {
     }
   }
   
-  // ===== 데이터 로드 =====
   async function loadData() {
     try {
       isLoading = true;
@@ -545,7 +556,6 @@ tr:hover td {
     }
   }
   
-  // ===== 데이터 저장 =====
   async function saveData(record) {
     try {
       isLoading = true;
@@ -587,7 +597,6 @@ tr:hover td {
     }
   }
   
-  // ===== 데이터 삭제 =====
   async function deleteRecord(id) {
     const numId = Number(id);
     const record = checklists.find(r => r.id === numId);
@@ -621,7 +630,6 @@ tr:hover td {
     }
   }
   
-  // ===== 로그인 화면 =====
   function showLogin() {
     const app = document.getElementById('app');
     app.innerHTML = `
@@ -647,11 +655,6 @@ tr:hover td {
     setTimeout(() => document.getElementById('email').focus(), 100);
   }
   
-  
-
-  
-
-  // ===== 로그인 =====
   async function login() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
@@ -670,14 +673,7 @@ tr:hover td {
       if (error) throw error;
       
       if (data.user) {
-        const metadata = data.user.user_metadata || {};
-        currentUser = {
-          id: data.user.id,
-          email: data.user.email,
-          name: metadata.name || data.user.email,
-          facility: metadata.facility || 'all'
-        };
-        
+        await checkSession();
         await loadData();
         showMenu();
       }
@@ -689,7 +685,6 @@ tr:hover td {
     }
   }
   
-  // ===== 로그아웃 =====
   async function logout() {
     if (confirm("🚪 로그아웃 하시겠습니까?")) {
       try {
@@ -703,7 +698,6 @@ tr:hover td {
     }
   }
   
-  // ===== 통계 계산 =====
   function getStats() {
     const today = new Date().toISOString().split('T')[0];
     const thisWeekStart = new Date();
@@ -711,7 +705,8 @@ tr:hover td {
     const weekStartStr = thisWeekStart.toISOString().split('T')[0];
     
     let filteredChecklists = checklists;
-    if (currentUser.facility !== "all") {
+    
+    if (currentUser.role !== 'admin' && currentUser.facility) {
       filteredChecklists = checklists.filter(c => c.facility === currentUser.facility);
     }
     
@@ -723,16 +718,21 @@ tr:hover td {
     return { todayCount, weekCount, totalCount, uniqueClients };
   }
   
-  // ===== 메뉴 화면 =====
   function showMenu() {
     const stats = getStats();
     const app = document.getElementById('app');
+    
+    const facilityDisplay = currentUser.role === 'admin' 
+      ? '<p style="margin-top: 5px; opacity: 0.9;">🔑 전체 시설 관리자</p>'
+      : currentUser.facility 
+        ? `<p style="margin-top: 5px; opacity: 0.9;">📍 ${currentUser.facility}</p>`
+        : '<p style="margin-top: 5px; opacity: 0.9;">⚠️ 시설 미배정</p>';
     
     app.innerHTML = `
 <div class="container">
   <div class="welcome-banner">
     <h3>👋 ${currentUser.name}님 환영합니다!</h3>
-    ${currentUser.facility !== "all" ? `<p style="margin-top: 5px; opacity: 0.9;">📍 ${currentUser.facility}</p>` : '<p style="margin-top: 5px; opacity: 0.9;">📍 전체 시설 관리자</p>'}
+    ${facilityDisplay}
     <p style="margin-top: 10px; opacity: 0.9;">오늘도 좋은 하루 되세요</p>
   </div>
   
@@ -776,7 +776,6 @@ tr:hover td {
     document.getElementById('logoutBtn').addEventListener('click', logout);
   }
   
-  // ===== 라디오 버튼 생성 =====
   function radio(label, name) {
     return `<div class="radio">
       <span class="radio-label">${label}</span>
@@ -785,7 +784,6 @@ tr:hover td {
     </div>`;
   }
   
-  // ===== 점검표 작성 화면 =====
   function showChecklist() {
     const today = new Date().toISOString().split('T')[0];
     const app = document.getElementById('app');
@@ -882,7 +880,7 @@ tr:hover td {
         <span class="button-icon">💾</span> 저장
       </button>
       <button class="btn-blue" id="nextBtn">
-        <span class="button-icon">➡️</span> 다음
+        <span class="button-icon">➡️</span> 메뉴로
       </button>
     </div>
   </div>
@@ -894,7 +892,6 @@ tr:hover td {
     setTimeout(() => document.getElementById('c_client').focus(), 100);
   }
   
-  // ===== 점검표 저장 =====
   async function saveChecklist() {
     function getRadioValue(name) {
       const elem = document.querySelector(`input[name="${name}"]:checked`);
@@ -923,12 +920,17 @@ tr:hover td {
       return;
     }
     
+    if (!currentUser.facility && currentUser.role !== 'admin') {
+      alert("⚠️ 시설 정보가 없습니다. 관리자에게 문의하세요.");
+      return;
+    }
+    
     const newRecord = {
       id: Date.now(),
       date: date,
       clientName: clientName,
       worker: workerName,
-      facility: currentUser.facility,
+      facility: currentUser.facility || '미지정',
       createdAt: new Date().toISOString(),
       health: {
         weight: document.getElementById('weight').value.trim(),
@@ -958,10 +960,10 @@ tr:hover td {
         e: getRadioValue("med_e")
       },
       env: {
-        clean: getRadioValue("clean"),
-        vent: getRadioValue("vent"),
-        temp: getRadioValue("temp"),
-        safe: getRadioValue("safe")
+        makeup: getRadioValue("makeup"),
+        clothes: getRadioValue("clothes"),
+        bag: getRadioValue("bag"),
+        shoes: getRadioValue("shoes")
       },
       special: document.getElementById('special').value.trim()
     };
@@ -969,7 +971,6 @@ tr:hover td {
     await saveData(newRecord);
   }
   
-  // ===== 카테고리 요약 =====
   function summaryCategory(obj) {
     const good = [];
     const log = [];
@@ -977,13 +978,14 @@ tr:hover td {
     const name = {
       wash: "세면", dental: "구강관리", hair: "머리정돈", nail: "손발톱관리",
       prep: "식사준비", role: "역할활동", bed: "침구정돈", cloth: "의복정리", conv: "대화",
-      Grooming: "화장", vent: "의복", temp: "가방", safe: "신발", m: "아침", a: "점심", e: "저녁"
+      makeup: "화장", clothes: "의복", bag: "가방", shoes: "신발", 
+      m: "아침", a: "점심", e: "저녁"
     };
     
     for (let k in obj) {
-      if (obj[k] === "양호") good.push(name[k])
-      if (obj[k] === "일지") log.push(name[k]);
-      if (obj[k] === "없음") none.push(name[k]);
+      if (obj[k] === "양호") good.push(name[k] || k);
+      if (obj[k] === "일지") log.push(name[k] || k);
+      if (obj[k] === "없음") none.push(name[k] || k);
     }
     
     let result = `✅ 양호: ${good.join(", ") || "없음"}`;
@@ -993,7 +995,6 @@ tr:hover td {
     return result;
   }
   
-  // ===== 기록 조회 화면 =====
   async function showSearch() {
     const today = new Date();
     const past = new Date();
@@ -1024,9 +1025,6 @@ tr:hover td {
       <button class="btn-blue" id="refreshBtn">
         <span class="button-icon">🔄</span> 새로고침 & 조회
       </button>
-      <button class="btn-green" id="pdfBtn">
-        <span class="button-icon">📄</span> PDF 저장
-      </button>
       <button class="btn-gray" id="backBtn">
         <span class="button-icon">↩️</span> 뒤로
       </button>
@@ -1036,28 +1034,23 @@ tr:hover td {
   </div>
 </div>`;
     
-    document.getElementById('refreshBtn').addEventListener('click', refreshAndSearch);
-    document.getElementById('pdfBtn').addEventListener('click', savePDF);
+    document.getElementById('refreshBtn').addEventListener('click', async () => {
+      await loadData();
+      search();
+    });
     document.getElementById('backBtn').addEventListener('click', showMenu);
     
     await loadData();
     search();
   }
   
-  // ===== 새로고침 & 조회 =====
-  async function refreshAndSearch() {
-    await loadData();
-    search();
-  }
-  
-  // ===== 검색 실행 =====
   function search() {
     const clientName = document.getElementById('searchClient').value.trim();
     const startDate = document.getElementById('startDate').value;
     const endDate = document.getElementById('endDate').value;
     
     let filtered = checklists.filter(record => {
-      const matchFacility = currentUser.facility === "all" || record.facility === currentUser.facility;
+      const matchFacility = currentUser.role === 'admin' || record.facility === currentUser.facility;
       const matchClient = !clientName || record.clientName.includes(clientName);
       const matchStart = !startDate || record.date >= startDate;
       const matchEnd = !endDate || record.date <= endDate;
@@ -1083,12 +1076,14 @@ tr:hover td {
     let html = `
       <div style="margin-bottom: 10px; color: #6b7280;">
         📊 총 <strong style="color: #667eea;">${filtered.length}건</strong>의 기록이 조회되었습니다.
+        ${currentUser.role !== 'admin' ? `<span style="margin-left: 10px;">(${currentUser.facility} 시설)</span>` : '<span style="margin-left: 10px;">(전체 시설)</span>'}
       </div>
       <table>
         <tr>
           <th style="width: 100px;">날짜</th>
           <th style="width: 100px;">이용자</th>
           <th style="width: 80px;">담당자</th>
+          ${currentUser.role === 'admin' ? '<th style="width: 80px;">시설</th>' : ''}
           <th>상세 내용</th>
           <th style="width: 80px;">관리</th>
         </tr>`;
@@ -1099,6 +1094,7 @@ tr:hover td {
         <td style="text-align:center; white-space:nowrap; font-weight: 600;">${record.date}</td>
         <td style="text-align:center; font-weight:600; color: #667eea;">${record.clientName}</td>
         <td style="text-align:center;">${record.worker}</td>
+        ${currentUser.role === 'admin' ? `<td style="text-align:center; color: #059669;">${record.facility || '미지정'}</td>` : ''}
         <td>
           <div style="line-height:1.9; font-size: 13px;">
             ${record.health.weight || record.health.bp || record.health.bs ? 
@@ -1134,174 +1130,6 @@ tr:hover td {
     });
   }
   
-  // ===== PDF 저장 =====
-  async function savePDF() {
-    const resultDiv = document.getElementById('result');
-    if (!resultDiv || !resultDiv.querySelector('table')) {
-      alert('⚠️ 조회된 결과가 없습니다. 먼저 조회 버튼을 눌러주세요.');
-      return;
-    }
-    
-    if (typeof jspdf === 'undefined' || typeof html2canvas === 'undefined') {
-      alert('⚠️ PDF 라이브러리를 로딩하는 중입니다. 잠시 후 다시 시도해주세요.');
-      return;
-    }
-    
-    const { jsPDF } = jspdf;
-    
-    const searchClient = document.getElementById('searchClient').value.trim();
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    
-    let filtered = checklists.filter(record => {
-      const matchFacility = currentUser.facility === "all" || record.facility === currentUser.facility;
-      const matchClient = !searchClient || record.clientName.includes(searchClient);
-      const matchStart = !startDate || record.date >= startDate;
-      const matchEnd = !endDate || record.date <= endDate;
-      return matchFacility && matchClient && matchStart && matchEnd;
-    });
-    
-    filtered.sort((a, b) => {
-      if (b.date !== a.date) return b.date.localeCompare(a.date);
-      return b.id - a.id;
-    });
-    
-    if (filtered.length === 0) {
-      alert('⚠️ 저장할 데이터가 없습니다.');
-      return;
-    }
-    
-    const pdfContainer = document.createElement('div');
-    pdfContainer.style.cssText = `
-      position: absolute;
-      left: -9999px;
-      width: 800px;
-      background: white;
-      padding: 40px;
-      font-family: 'Malgun Gothic', Arial, sans-serif;
-    `;
-    
-    let htmlContent = `
-      <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #667eea; padding-bottom: 20px;">
-        <h1 style="color: #1f2937; font-size: 32px; margin: 0;">돌봄 점검 기록</h1>
-        <p style="color: #6b7280; margin-top: 15px; font-size: 16px;">조회 기간: ${startDate} ~ ${endDate}</p>
-        ${searchClient ? `<p style="color: #6b7280; margin-top: 5px; font-size: 16px;">이용자: ${searchClient}</p>` : ''}
-        <p style="color: #6b7280; margin-top: 5px; font-size: 14px;">총 ${filtered.length}건의 기록</p>
-      </div>
-    `;
-    
-    filtered.forEach((record, index) => {
-      htmlContent += `
-        <div style="margin-bottom: 25px; border: 2px solid #667eea; border-radius: 8px; padding: 20px; page-break-inside: avoid; background: #fafafa;">
-          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-            <strong style="font-size: 18px;">${record.date} | ${record.clientName}</strong>
-            <span style="float: right; font-size: 14px;">담당: ${record.worker}</span>
-          </div>
-          
-          ${record.health.weight || record.health.bp || record.health.bs ? `
-          <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 6px;">
-            <strong style="color: #1f2937; font-size: 15px;">💊 건강 상태:</strong>
-            <span style="color: #4b5563; margin-left: 10px;">
-              체중 ${record.health.weight || '-'} | 
-              혈압 ${record.health.bp || '-'} | 
-              혈당 ${record.health.bs || '-'}
-            </span>
-          </div>
-          ` : ''}
-          
-          ${record.meal.menu ? `
-          <div style="margin-bottom: 12px; padding: 10px; background: white; border-radius: 6px;">
-            <strong style="color: #1f2937; font-size: 15px;">🍽️ 식사:</strong>
-            <span style="color: #4b5563; margin-left: 10px;">
-              ${record.meal.menu} (섭취량: ${record.meal.amount})
-            </span>
-          </div>
-          ` : ''}
-          
-          <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px;">
-            <strong style="color: #1f2937; font-size: 14px;">🧼 위생:</strong>
-            <div style="color: #4b5563; margin-top: 5px; font-size: 13px;">${summaryCategory(record.hygiene)}</div>
-          </div>
-          
-          <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px;">
-            <strong style="color: #1f2937; font-size: 14px;">🏠 일상:</strong>
-            <div style="color: #4b5563; margin-top: 5px; font-size: 13px;">${summaryCategory(record.daily)}</div>
-          </div>
-          
-          <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px;">
-            <strong style="color: #1f2937; font-size: 14px;">💉 투약:</strong>
-            <div style="color: #4b5563; margin-top: 5px; font-size: 13px;">${summaryCategory(record.med)}</div>
-          </div>
-          
-          <div style="margin-bottom: 10px; padding: 10px; background: white; border-radius: 6px;">
-            <strong style="color: #1f2937; font-size: 14px;">✨ 외모:</strong>
-            <div style="color: #4b5563; margin-top: 5px; font-size: 13px;">${summaryCategory(record.env)}</div>
-          </div>
-          
-          ${record.special ? `
-          <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px;">
-            <strong style="color: #92400e; font-size: 14px;">📌 특이사항:</strong>
-            <p style="color: #78350f; margin: 8px 0 0 0; line-height: 1.6;">${record.special}</p>
-          </div>
-          ` : ''}
-        </div>
-      `;
-    });
-    
-    pdfContainer.innerHTML = htmlContent;
-    document.body.appendChild(pdfContainer);
-    
-    try {
-      const buttons = document.querySelectorAll('button');
-      buttons.forEach(btn => btn.disabled = true);
-      
-      const canvas = await html2canvas(pdfContainer, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      let position = 0;
-      
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-      
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-      
-      const fileName = `돌봄점검기록_${searchClient || '전체'}_${startDate}_${endDate}.pdf`;
-      pdf.save(fileName);
-      
-      buttons.forEach(btn => btn.disabled = false);
-      alert('✅ PDF 파일이 다운로드되었습니다!');
-      
-    } catch (error) {
-      console.error('PDF 생성 오류:', error);
-      alert('❌ PDF 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
-      
-      const buttons = document.querySelectorAll('button');
-      buttons.forEach(btn => btn.disabled = false);
-      
-    } finally {
-      if (document.body.contains(pdfContainer)) {
-        document.body.removeChild(pdfContainer);
-      }
-    }
-  }
-  
-  // ===== 초기화 =====
   async function init() {
     try {
       if (!initSupabase()) {
@@ -1357,5 +1185,3 @@ tr:hover td {
 </script>
 </body>
 </html>
-
-
