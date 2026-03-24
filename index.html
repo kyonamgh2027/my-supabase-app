@@ -8,16 +8,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Supabase 설정
 const SUPABASE_URL = 'https://nogzefpmsenbcxqlnmjl.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vZ3plZnBtc2VuYmN4cWxubWpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMjMwNzQsImV4cCI6MjA4NTY5OTA3NH0.3N_AbsD0ovXR1c-GXsQ4dfsfJ1ZQXOziCL14MGb3amE';
 </script>
 <style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: 'Malgun Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
@@ -26,411 +21,163 @@ body {
   padding: 20px;
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
+.container { max-width: 1200px; margin: 0 auto; }
 
 .card {
   background: white;
   padding: 30px;
   border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
   margin-bottom: 20px;
   animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-h2, h3 {
-  color: #1f2937;
-  margin-bottom: 20px;
-  font-weight: 600;
-}
-
-h2 {
-  font-size: 28px;
-  text-align: center;
-}
-
-h3 {
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-icon {
-  font-size: 32px;
-}
+h2, h3 { color: #1f2937; margin-bottom: 20px; font-weight: 600; }
+h2 { font-size: 28px; text-align: center; }
+h3 { font-size: 24px; display: flex; align-items: center; gap: 10px; }
+.header-icon { font-size: 32px; }
 
 button {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 15px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  margin: 5px;
+  padding: 12px 24px; border: none; border-radius: 8px;
+  cursor: pointer; font-size: 15px; font-weight: 500;
+  transition: all 0.3s ease; margin: 5px;
 }
+button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+button:active:not(:disabled) { transform: translateY(0); }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
+.btn-blue   { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.btn-green  { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white; }
+.btn-red    { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: white; }
+.btn-gray   { background: #e5e7eb; color: #374151; }
+.btn-orange { background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); color: white; }
 
-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-blue {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.btn-blue:hover:not(:disabled) {
-  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
-}
-
-.btn-green {
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-  color: white;
-}
-
-.btn-green:hover:not(:disabled) {
-  background: linear-gradient(135deg, #15803d 0%, #166534 100%);
-}
-
-.btn-red {
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
-  color: white;
-}
-
-.btn-red:hover:not(:disabled) {
-  background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
-}
-
-.btn-gray {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.btn-gray:hover:not(:disabled) {
-  background: #d1d5db;
-}
+.btn-blue:hover:not(:disabled)   { background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%); }
+.btn-green:hover:not(:disabled)  { background: linear-gradient(135deg, #15803d 0%, #166534 100%); }
+.btn-red:hover:not(:disabled)    { background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); }
+.btn-orange:hover:not(:disabled) { background: linear-gradient(135deg, #c2410c 0%, #9a3412 100%); }
 
 input, select, textarea {
-  width: 100%;
-  padding: 12px 16px;
-  margin: 8px 0;
-  border-radius: 8px;
-  border: 2px solid #e5e7eb;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  font-family: inherit;
+  width: 100%; padding: 12px 16px; margin: 8px 0;
+  border-radius: 8px; border: 2px solid #e5e7eb;
+  font-size: 14px; transition: all 0.3s ease; font-family: inherit;
 }
-
 input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  outline: none; border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
 }
+textarea { min-height: 100px; resize: vertical; }
 
-textarea {
-  min-height: 100px;
-  resize: vertical;
+/* ===== 수정 모드 강조 배너 ===== */
+.edit-banner {
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  color: white; padding: 14px 20px; border-radius: 10px;
+  margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+  font-weight: 600; font-size: 16px;
 }
 
 .section {
   background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-  padding: 20px;
-  margin: 15px 0;
-  border-radius: 12px;
+  padding: 20px; margin: 15px 0; border-radius: 12px;
   border-left: 4px solid #667eea;
 }
-
 .section b {
-  display: block;
-  font-size: 18px;
-  color: #1f2937;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: block; font-size: 18px; color: #1f2937;
+  margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
 }
-
-.section-icon {
-  font-size: 22px;
-}
+.section-icon { font-size: 22px; }
 
 .radio {
-  margin: 10px 0;
-  padding: 10px;
-  background: white;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  flex-wrap: wrap;
+  margin: 10px 0; padding: 10px; background: white;
+  border-radius: 8px; display: flex; align-items: center;
+  gap: 15px; flex-wrap: wrap;
 }
-
-.radio-label {
-  font-weight: 500;
-  color: #374151;
-  min-width: 120px;
-}
-
+.radio-label { font-weight: 500; color: #374151; min-width: 120px; }
 .radio label {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 6px; cursor: pointer;
   transition: all 0.2s ease;
 }
-
-.radio label:hover {
-  background: #f3f4f6;
-}
-
-.radio input[type="radio"] {
-  width: auto;
-  margin: 0;
-  cursor: pointer;
-}
+.radio label:hover { background: #f3f4f6; }
+.radio input[type="radio"] { width: auto; margin: 0; cursor: pointer; }
 
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  font-size: 13px;
-  overflow: hidden;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%; border-collapse: collapse; margin-top: 20px;
+  font-size: 13px; overflow: hidden; border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
-
 th {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 14px;
-  text-align: center;
-  font-weight: 600;
+  color: white; padding: 14px; text-align: center; font-weight: 600;
+}
+td { border: 1px solid #e5e7eb; padding: 12px; text-align: left; background: white; }
+tr:hover td { background: #f9fafb; }
+
+/* ===== 날짜순 정렬 표시 ===== */
+.sort-badge {
+  display: inline-block; background: #f0fdf4;
+  color: #16a34a; border: 1px solid #bbf7d0;
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 12px; font-weight: 600; margin-left: 10px;
 }
 
-td {
-  border: 1px solid #e5e7eb;
-  padding: 12px;
-  text-align: left;
-  background: white;
-}
+.login-container { display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 40px); }
+.login-card { max-width: 400px; width: 100%; }
+.login-card h2 { margin-bottom: 30px; }
+.login-info { background: #f0f9ff; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #0284c7; }
+.login-info p { color: #0369a1; font-size: 14px; margin: 5px 0; }
 
-tr:hover td {
-  background: #f9fafb;
-}
-
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 40px);
-}
-
-.login-card {
-  max-width: 400px;
-  width: 100%;
-}
-
-.login-card h2 {
-  margin-bottom: 30px;
-}
-
-.login-info {
-  background: #f0f9ff;
-  padding: 15px;
-  border-radius: 8px;
-  margin-top: 20px;
-  border-left: 4px solid #0284c7;
-}
-
-.login-info p {
-  color: #0369a1;
-  font-size: 14px;
-  margin: 5px 0;
-}
-
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-  margin-top: 20px;
-}
-
-.menu-grid button {
-  width: 100%;
-  padding: 20px;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.button-icon {
-  font-size: 24px;
-}
+.menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; }
+.menu-grid button { width: 100%; padding: 20px; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+.button-icon { font-size: 24px; }
 
 .search-form {
-  background: #f9fafb;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  align-items: end;
+  background: #f9fafb; padding: 20px; border-radius: 12px; margin-bottom: 20px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px; align-items: end;
 }
+.form-group { display: flex; flex-direction: column; }
+.form-group label { font-weight: 500; color: #374151; margin-bottom: 5px; font-size: 14px; }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
+.action-buttons { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
 
-.form-group label {
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 5px;
-  font-size: 14px;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: #6b7280;
-}
-
-.empty-state-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
-  opacity: 0.5;
-}
+.empty-state { text-align: center; padding: 60px 20px; color: #6b7280; }
+.empty-state-icon { font-size: 64px; margin-bottom: 20px; opacity: 0.5; }
 
 .welcome-banner {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  text-align: center;
+  color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;
 }
+.welcome-banner h3 { color: white; margin: 0; justify-content: center; }
 
-.welcome-banner h3 {
-  color: white;
-  margin: 0;
-  justify-content: center;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
 .stat-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  border-left: 4px solid #667eea;
+  background: white; padding: 20px; border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center; border-left: 4px solid #667eea;
 }
+.stat-card h4 { color: #6b7280; font-size: 14px; margin-bottom: 10px; }
+.stat-card .stat-value { font-size: 32px; font-weight: bold; color: #1f2937; }
 
-.stat-card h4 {
-  color: #6b7280;
-  font-size: 14px;
-  margin-bottom: 10px;
-}
-
-.stat-card .stat-value {
-  font-size: 32px;
-  font-weight: bold;
-  color: #1f2937;
-}
-
-.loading {
-  text-align: center;
-  padding: 40px;
-  color: white;
-}
+.loading { text-align: center; padding: 40px; color: white; }
 
 @media (max-width: 768px) {
-  .card {
-    padding: 20px;
-  }
-  
-  h2 {
-    font-size: 24px;
-  }
-  
-  h3 {
-    font-size: 20px;
-  }
-  
-  .radio {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  table {
-    font-size: 11px;
-  }
-  
-  th, td {
-    padding: 8px;
-  }
+  .card { padding: 20px; }
+  h2 { font-size: 24px; }
+  h3 { font-size: 20px; }
+  .radio { flex-direction: column; align-items: flex-start; }
+  table { font-size: 11px; }
+  th, td { padding: 8px; }
 }
-
 @media print {
-  body {
-    background: white;
-    padding: 0;
-  }
-  
-  .btn-green, .btn-blue, .btn-gray, .btn-red {
-    display: none;
-  }
-  
-  .search-form {
-    display: none;
-  }
-  
-  .action-buttons {
-    display: none;
-  }
+  body { background: white; padding: 0; }
+  .btn-green, .btn-blue, .btn-gray, .btn-red, .btn-orange { display: none; }
+  .search-form { display: none; }
+  .action-buttons { display: none; }
 }
 </style>
 </head>
@@ -446,89 +193,69 @@ tr:hover td {
 <script>
 (function() {
   'use strict';
-  
+
   let supabase = null;
   let currentUser = null;
   let checklists = [];
   let isLoading = false;
-  
+
+  // ─────────────────────────────────────────
+  // [수정] 수정 모드 전역 상태
+  // ─────────────────────────────────────────
+  let editId = null; // null이면 신규 저장, 숫자면 수정 모드
+
+  // ─────────────────────────────────────────
+  // Supabase 초기화
+  // ─────────────────────────────────────────
   function initSupabase() {
     try {
-      if (typeof window.supabase === 'undefined') {
-        console.error('Supabase 라이브러리가 로드되지 않았습니다.');
-        return false;
-      }
+      if (typeof window.supabase === 'undefined') return false;
       supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      console.log('Supabase 초기화 완료');
       return true;
-    } catch (error) {
-      console.error('Supabase 초기화 오류:', error);
-      return false;
-    }
+    } catch (e) { console.error(e); return false; }
   }
-  
+
   async function checkSession() {
     try {
       const { data: { session }, error } = await supabase.auth.getSession();
-      
       if (error) throw error;
-      
       if (session && session.user) {
         const { data: userProfile, error: profileError } = await supabase
           .from('users')
-          .select(`
-            id,
-            email,
-            name,
-            role,
-            facility_id,
-            facilities (
-              name
-            )
-          `)
+          .select('id, email, name, role, facility_id, facilities(name)')
           .eq('id', session.user.id)
           .single();
-        
         if (profileError) {
-          console.warn('프로필 정보 로드 실패:', profileError);
-          currentUser = {
-            id: session.user.id,
-            email: session.user.email,
-            name: session.user.email,
-            facility: null,
-            role: 'staff'
-          };
+          currentUser = { id: session.user.id, email: session.user.email, name: session.user.email, facility: null, role: 'staff' };
         } else {
           currentUser = {
-            id: userProfile.id,
-            email: userProfile.email,
+            id: userProfile.id, email: userProfile.email,
             name: userProfile.name || userProfile.email,
             facility: userProfile.facilities?.name || null,
             facilityId: userProfile.facility_id,
             role: userProfile.role || 'staff'
           };
         }
-        
-        console.log('로그인 사용자:', currentUser);
         return true;
       }
       return false;
-    } catch (error) {
-      console.error('세션 확인 오류:', error);
-      return false;
-    }
+    } catch (e) { console.error(e); return false; }
   }
-  
+
+  // ─────────────────────────────────────────
+  // 데이터 로드
+  // [수정] ascending: true → 과거(오래된 날짜) 먼저 정렬
+  // ─────────────────────────────────────────
   async function loadData() {
     try {
       isLoading = true;
       const { data, error } = await supabase
         .from('care')
         .select('*')
-        .order('created_at', { ascending: false });
-      
+        .order('check_date', { ascending: true }); // ✅ 과거순 정렬
+
       if (error) throw error;
-      
+
       checklists = (data || []).map(row => ({
         id: row.id,
         date: row.check_date,
@@ -536,476 +263,411 @@ tr:hover td {
         worker: row.worker,
         facility: row.facility,
         createdAt: row.created_at,
-        health: row.info?.health || {},
-        hygiene: row.info?.hygiene || {},
-        meal: row.info?.meal || {},
-        daily: row.info?.daily || {},
-        med: row.info?.med || {},
-        env: row.info?.env || {},
-        special: row.info?.special || ''
+        health:  row.info?.health   || {},
+        hygiene: row.info?.hygiene  || {},
+        meal:    row.info?.meal     || {},
+        daily:   row.info?.daily    || {},
+        med:     row.info?.med      || {},
+        env:     row.info?.env      || {},
+        special: row.info?.special  || ''
       }));
-      
-      console.log('데이터 로드 완료:', checklists.length, '건');
       return true;
-    } catch (error) {
-      console.error('로드 오류:', error);
-      alert('❌ 데이터 로드 실패: ' + error.message);
+    } catch (e) {
+      console.error(e);
+      alert('❌ 데이터 로드 실패: ' + e.message);
       return false;
-    } finally {
-      isLoading = false;
-    }
+    } finally { isLoading = false; }
   }
-  
+
+  // ─────────────────────────────────────────
+  // [수정] 저장 / 수정 통합 함수
+  // ─────────────────────────────────────────
   async function saveData(record) {
     try {
       isLoading = true;
-      
       const { data: { user } } = await supabase.auth.getUser();
-      
-      const { data, error } = await supabase
-        .from('care')
-        .insert([{
-          check_date: record.date,
-          client: record.clientName,
-          worker: record.worker,
-          facility: record.facility,
-          user_id: user?.id,
-          info: {
-            health: record.health,
-            hygiene: record.hygiene,
-            meal: record.meal,
-            daily: record.daily,
-            med: record.med,
-            env: record.env,
-            special: record.special
-          }
-        }])
-        .select();
-      
-      if (error) throw error;
-      
-      alert('✅ 저장 완료!');
+
+      const payload = {
+        check_date: record.date,
+        client:     record.clientName,
+        worker:     record.worker,
+        facility:   record.facility,
+        user_id:    user?.id,
+        info: {
+          health:  record.health,
+          hygiene: record.hygiene,
+          meal:    record.meal,
+          daily:   record.daily,
+          med:     record.med,
+          env:     record.env,
+          special: record.special
+        }
+      };
+
+      if (editId) {
+        // ── 수정 모드 ──
+        const { error } = await supabase
+          .from('care')
+          .update(payload)
+          .eq('id', editId);
+        if (error) throw error;
+        alert('✅ 수정 완료!');
+      } else {
+        // ── 신규 저장 ──
+        const { error } = await supabase
+          .from('care')
+          .insert([payload])
+          .select();
+        if (error) throw error;
+        alert('✅ 저장 완료!');
+      }
+
+      editId = null; // 상태 초기화
       await loadData();
       showMenu();
       return true;
-    } catch (error) {
-      console.error('저장 오류:', error);
-      alert('❌ 저장 실패: ' + error.message);
+    } catch (e) {
+      console.error(e);
+      alert('❌ 저장 실패: ' + e.message);
       return false;
-    } finally {
-      isLoading = false;
-    }
+    } finally { isLoading = false; }
   }
-  
+
+  // ─────────────────────────────────────────
+  // [수정] 수정 기능 - 기존 데이터를 폼에 불러오기
+  // ─────────────────────────────────────────
+  function editRecord(id) {
+    const numId = Number(id);
+    const record = checklists.find(r => r.id === numId);
+    if (!record) { alert('❌ 기록을 찾을 수 없습니다.'); return; }
+
+    editId = numId; // 수정 모드 활성화
+    showChecklist(record); // 폼에 데이터 채우기
+  }
+
+  // ─────────────────────────────────────────
+  // 삭제 기능
+  // ─────────────────────────────────────────
   async function deleteRecord(id) {
     const numId = Number(id);
     const record = checklists.find(r => r.id === numId);
-    
-    if (!record) {
-      alert("❌ 기록을 찾을 수 없습니다.");
-      return;
-    }
-    
+    if (!record) { alert('❌ 기록을 찾을 수 없습니다.'); return; }
+
     const confirmMsg = `정말 삭제하시겠습니까?\n\n날짜: ${record.date}\n이용자: ${record.clientName}\n담당자: ${record.worker}`;
-    
     if (!confirm(confirmMsg)) return;
-    
+
     try {
       isLoading = true;
-      const { error } = await supabase
-        .from('care')
-        .delete()
-        .eq('id', numId);
-      
+      const { error } = await supabase.from('care').delete().eq('id', numId);
       if (error) throw error;
-      
       alert('✅ 삭제 완료');
       await loadData();
       search();
-    } catch (error) {
-      console.error('삭제 오류:', error);
-      alert('❌ 삭제 실패: ' + error.message);
-    } finally {
-      isLoading = false;
-    }
+    } catch (e) {
+      console.error(e);
+      alert('❌ 삭제 실패: ' + e.message);
+    } finally { isLoading = false; }
   }
-  
+
+  // ─────────────────────────────────────────
+  // 로그인
+  // ─────────────────────────────────────────
   function showLogin() {
-    const app = document.getElementById('app');
-    app.innerHTML = `
+    document.getElementById('app').innerHTML = `
 <div class="login-container">
   <div class="card login-card">
     <h2>🏡돌봄 점검 관리</h2>
-    <div class="login-info" style="margin-bottom: 20px;">
-      <p>직원만 접근 가능합니다</p>
-    </div>
-    <input id="email" type="email" placeholder="이메일을 입력하세요" autocomplete="username">
-    <input id="password" type="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password">
-    <button class="btn-blue" id="loginBtn" style="width:100%; margin-top:10px;">
-      <span class="button-icon">🔐</span> 로그인
-    </button>
+    <div class="login-info" style="margin-bottom:20px;"><p>직원만 접근 가능합니다</p></div>
+    <input id="email" type="email" placeholder="이메일" autocomplete="username">
+    <input id="password" type="password" placeholder="비밀번호" autocomplete="current-password">
+    <button class="btn-blue" id="loginBtn" style="width:100%;margin-top:10px;">🔐 로그인</button>
   </div>
 </div>`;
-    
-    document.getElementById('password').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') login();
-    });
+    document.getElementById('password').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
     document.getElementById('loginBtn').addEventListener('click', login);
-    
     setTimeout(() => document.getElementById('email').focus(), 100);
   }
-  
+
   async function login() {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
-    
-    if (!email || !password) {
-      alert("⚠️ 이메일과 비밀번호를 입력해주세요.");
-      return;
-    }
-    
+    if (!email || !password) { alert('⚠️ 이메일과 비밀번호를 입력해주세요.'); return; }
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password
-      });
-      
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      
-      if (data.user) {
-        await checkSession();
-        await loadData();
-        showMenu();
-      }
-    } catch (error) {
-      console.error('로그인 오류:', error);
-      alert("❌ 로그인 실패: " + error.message);
+      if (data.user) { await checkSession(); await loadData(); showMenu(); }
+    } catch (e) {
+      alert('❌ 로그인 실패: ' + e.message);
       document.getElementById('password').value = '';
       document.getElementById('password').focus();
     }
   }
-  
+
   async function logout() {
-    if (confirm("🚪 로그아웃 하시겠습니까?")) {
-      try {
-        await supabase.auth.signOut();
-        currentUser = null;
-        showLogin();
-      } catch (error) {
-        console.error('로그아웃 오류:', error);
-        alert('❌ 로그아웃 실패');
-      }
+    if (confirm('🚪 로그아웃 하시겠습니까?')) {
+      try { await supabase.auth.signOut(); currentUser = null; showLogin(); }
+      catch (e) { alert('❌ 로그아웃 실패'); }
     }
   }
-  
+
+  // ─────────────────────────────────────────
+  // 통계
+  // ─────────────────────────────────────────
   function getStats() {
     const today = new Date().toISOString().split('T')[0];
-    const thisWeekStart = new Date();
-    thisWeekStart.setDate(thisWeekStart.getDate() - 7);
-    const weekStartStr = thisWeekStart.toISOString().split('T')[0];
-    
-    let filteredChecklists = checklists;
-    
-    if (currentUser.role !== 'admin' && currentUser.facility) {
-      filteredChecklists = checklists.filter(c => c.facility === currentUser.facility);
-    }
-    
-    const todayCount = filteredChecklists.filter(c => c.date === today).length;
-    const weekCount = filteredChecklists.filter(c => c.date >= weekStartStr).length;
-    const totalCount = filteredChecklists.length;
-    const uniqueClients = new Set(filteredChecklists.map(c => c.clientName)).size;
-    
-    return { todayCount, weekCount, totalCount, uniqueClients };
+    const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 7);
+    const weekStartStr = weekStart.toISOString().split('T')[0];
+    let list = currentUser.role !== 'admin' && currentUser.facility
+      ? checklists.filter(c => c.facility === currentUser.facility)
+      : checklists;
+    return {
+      todayCount:    list.filter(c => c.date === today).length,
+      weekCount:     list.filter(c => c.date >= weekStartStr).length,
+      totalCount:    list.length,
+      uniqueClients: new Set(list.map(c => c.clientName)).size
+    };
   }
-  
+
+  // ─────────────────────────────────────────
+  // 메인 메뉴
+  // ─────────────────────────────────────────
   function showMenu() {
+    editId = null; // 메뉴로 돌아올 때 수정 상태 초기화
     const stats = getStats();
-    const app = document.getElementById('app');
-    
-    const facilityDisplay = currentUser.role === 'admin' 
-      ? '<p style="margin-top: 5px; opacity: 0.9;">🔑 전체 시설 관리자</p>'
-      : currentUser.facility 
-        ? `<p style="margin-top: 5px; opacity: 0.9;">📍 ${currentUser.facility}</p>`
-        : '<p style="margin-top: 5px; opacity: 0.9;">⚠️ 시설 미배정</p>';
-    
-    app.innerHTML = `
+    const facilityDisplay = currentUser.role === 'admin'
+      ? '<p style="margin-top:5px;opacity:.9;">🔑 전체 시설 관리자</p>'
+      : currentUser.facility
+        ? `<p style="margin-top:5px;opacity:.9;">📍 ${currentUser.facility}</p>`
+        : '<p style="margin-top:5px;opacity:.9;">⚠️ 시설 미배정</p>';
+
+    document.getElementById('app').innerHTML = `
 <div class="container">
   <div class="welcome-banner">
     <h3>👋 ${currentUser.name}님 환영합니다!</h3>
     ${facilityDisplay}
-    <p style="margin-top: 10px; opacity: 0.9;">오늘도 좋은 하루 되세요</p>
+    <p style="margin-top:10px;opacity:.9;">오늘도 좋은 하루 되세요</p>
   </div>
-  
   <div class="stats-grid">
-    <div class="stat-card">
-      <h4>오늘 작성</h4>
-      <div class="stat-value">${stats.todayCount}</div>
-    </div>
-    <div class="stat-card">
-      <h4>이번 주</h4>
-      <div class="stat-value">${stats.weekCount}</div>
-    </div>
-    <div class="stat-card">
-      <h4>전체 기록</h4>
-      <div class="stat-value">${stats.totalCount}</div>
-    </div>
-    <div class="stat-card">
-      <h4>이용자 수</h4>
-      <div class="stat-value">${stats.uniqueClients}</div>
-    </div>
+    <div class="stat-card"><h4>오늘 작성</h4><div class="stat-value">${stats.todayCount}</div></div>
+    <div class="stat-card"><h4>이번 주</h4><div class="stat-value">${stats.weekCount}</div></div>
+    <div class="stat-card"><h4>전체 기록</h4><div class="stat-value">${stats.totalCount}</div></div>
+    <div class="stat-card"><h4>이용자 수</h4><div class="stat-value">${stats.uniqueClients}</div></div>
   </div>
-  
   <div class="card">
     <h3><span class="header-icon">📋</span> 메인 메뉴</h3>
     <div class="menu-grid">
-      <button class="btn-green" id="checklistBtn">
-        <span class="button-icon">✍️</span> 점검표 작성
-      </button>
-      <button class="btn-blue" id="searchBtn">
-        <span class="button-icon">🔍</span> 기록 조회
-      </button>
-      <button class="btn-red" id="logoutBtn">
-        <span class="button-icon">🚪</span> 로그아웃
-      </button>
+      <button class="btn-green" id="checklistBtn"><span class="button-icon">✍️</span> 점검표 작성</button>
+      <button class="btn-blue"  id="searchBtn"><span class="button-icon">🔍</span> 기록 조회</button>
+      <button class="btn-red"   id="logoutBtn"><span class="button-icon">🚪</span> 로그아웃</button>
     </div>
   </div>
 </div>`;
-    
-    document.getElementById('checklistBtn').addEventListener('click', showChecklist);
+    document.getElementById('checklistBtn').addEventListener('click', () => { editId = null; showChecklist(null); });
     document.getElementById('searchBtn').addEventListener('click', showSearch);
     document.getElementById('logoutBtn').addEventListener('click', logout);
   }
-  
-  function radio(label, name) {
+
+  // ─────────────────────────────────────────
+  // 라디오 버튼 헬퍼
+  // ─────────────────────────────────────────
+  function radio(label, name, existingValue) {
+    const goodChecked  = (!existingValue || existingValue === '양호') ? 'checked' : '';
+    const logChecked   = existingValue === '일지' ? 'checked' : '';
     return `<div class="radio">
       <span class="radio-label">${label}</span>
-      <label><input type="radio" name="${name}" value="양호" checked> ✅ 양호</label>
-      <label><input type="radio" name="${name}" value="일지"> 📝 일지</label>
+      <label><input type="radio" name="${name}" value="양호" ${goodChecked}> ✅ 양호</label>
+      <label><input type="radio" name="${name}" value="일지" ${logChecked}> 📝 일지</label>
     </div>`;
   }
-  
-  function showChecklist() {
-    const today = new Date().toISOString().split('T')[0];
-    const app = document.getElementById('app');
-    
-    app.innerHTML = `
+
+  // ─────────────────────────────────────────
+  // 점검표 폼 - 신규 & 수정 공용
+  // [수정] record 파라미터: null이면 신규, 객체면 수정
+  // ─────────────────────────────────────────
+  function showChecklist(record) {
+    const isEdit = !!record;
+    const today  = new Date().toISOString().split('T')[0];
+
+    const v = (key, fallback = '') => isEdit ? (record[key] ?? fallback) : fallback;
+
+    // 투약 라디오 선택값
+    function medRadio(label, name, existingValue) {
+      const goodChecked = (!existingValue || existingValue === '양호') ? 'checked' : '';
+      const noneChecked = existingValue === '없음' ? 'checked' : '';
+      return `<div class="radio">
+        <span class="radio-label">${label}</span>
+        <label><input type="radio" name="${name}" value="양호" ${goodChecked}> ✅ 양호</label>
+        <label><input type="radio" name="${name}" value="없음" ${noneChecked}> ❌ 없음</label>
+      </div>`;
+    }
+
+    // 식사량 라디오
+    const mealAmt = isEdit ? (record.meal?.amount || '보통') : '보통';
+    function mealAmtRadio(val, label) {
+      return `<label><input type="radio" name="meal_amount" value="${val}" ${mealAmt === val ? 'checked' : ''}> ${label}</label>`;
+    }
+
+    const editBanner = isEdit
+      ? `<div class="edit-banner">✏️ 수정 모드 — ${record.date} / ${record.clientName} 기록을 수정 중입니다.</div>`
+      : '';
+
+    document.getElementById('app').innerHTML = `
 <div class="container">
   <div class="card">
-    <h3><span class="header-icon">✍️</span> 돌봄 점검표 작성</h3>
-    
+    ${editBanner}
+    <h3><span class="header-icon">${isEdit ? '✏️' : '✍️'}</span> 돌봄 점검표 ${isEdit ? '수정' : '작성'}</h3>
+
     <div class="form-group">
       <label>📅 점검 날짜 *</label>
-      <input type="date" id="c_date" value="${today}" required>
+      <input type="date" id="c_date" value="${isEdit ? v('date') : today}" required>
     </div>
-    
     <div class="form-group">
       <label>👤 이용자명 *</label>
-      <input placeholder="이용자명을 입력하세요" id="c_client" required>
+      <input placeholder="이용자명" id="c_client" value="${isEdit ? v('clientName') : ''}" required>
     </div>
-    
     <div class="form-group">
       <label>👨‍⚕️ 작성 직원명 *</label>
-      <input placeholder="직원 이름을 입력하세요" id="c_worker" value="${currentUser.name}" required>
+      <input placeholder="직원 이름" id="c_worker" value="${isEdit ? v('worker') : currentUser.name}" required>
     </div>
 
     <div class="section">
       <b><span class="section-icon">💊</span> 건강 상태</b>
-      <input placeholder="체중 (kg)" id="weight">
-      <input placeholder="혈압 (mmHg)" id="bp">
-      <input placeholder="혈당 (mg/dL)" id="bs">
+      <input placeholder="체중 (kg)"   id="weight" value="${isEdit ? (record.health?.weight || '') : ''}">
+      <input placeholder="혈압 (mmHg)" id="bp"     value="${isEdit ? (record.health?.bp     || '') : ''}">
+      <input placeholder="혈당 (mg/dL)" id="bs"    value="${isEdit ? (record.health?.bs     || '') : ''}">
     </div>
 
     <div class="section">
       <b><span class="section-icon">🧼</span> 위생 관리</b>
-      ${radio("세면", "wash")}
-      ${radio("구강", "dental")}
-      ${radio("머리", "hair")}
-      ${radio("손발톱", "nail")}
+      ${radio('세면',   'wash',   isEdit ? record.hygiene?.wash   : null)}
+      ${radio('구강',   'dental', isEdit ? record.hygiene?.dental : null)}
+      ${radio('머리',   'hair',   isEdit ? record.hygiene?.hair   : null)}
+      ${radio('손발톱', 'nail',   isEdit ? record.hygiene?.nail   : null)}
     </div>
 
     <div class="section">
       <b><span class="section-icon">🍽️</span> 식사</b>
-      <input placeholder="식단 욕구" id="menu">
+      <input placeholder="식단 욕구" id="menu" value="${isEdit ? (record.meal?.menu || '') : ''}">
       <div class="radio">
         <span class="radio-label">식사 섭취량</span>
-        <label><input type="radio" name="meal_amount" value="소식"> 🍚 소식</label>
-        <label><input type="radio" name="meal_amount" value="보통" checked> 🍚🍚 보통</label>
-        <label><input type="radio" name="meal_amount" value="과식"> 🍚🍚🍚 과식</label>
+        ${mealAmtRadio('소식', '🍚 소식')}
+        ${mealAmtRadio('보통', '🍚🍚 보통')}
+        ${mealAmtRadio('과식', '🍚🍚🍚 과식')}
       </div>
-      ${radio("식사 준비 참여", "prep")}
+      ${radio('식사 준비 참여', 'prep', isEdit ? record.meal?.prep : null)}
     </div>
 
     <div class="section">
       <b><span class="section-icon">🏠</span> 일상 생활</b>
-      ${radio("역할 활동", "role")}
-      ${radio("침구 청결", "bed")}
-      ${radio("의복 정리", "cloth")}
-      ${radio("대화", "conv")}
+      ${radio('역할 활동', 'role',  isEdit ? record.daily?.role  : null)}
+      ${radio('침구 청결', 'bed',   isEdit ? record.daily?.bed   : null)}
+      ${radio('의복 정리', 'cloth', isEdit ? record.daily?.cloth : null)}
+      ${radio('대화',      'conv',  isEdit ? record.daily?.conv  : null)}
     </div>
 
     <div class="section">
       <b><span class="section-icon">💉</span> 투약 관리</b>
-      <div class="radio">
-        <span class="radio-label">아침 투약</span>
-        <label><input type="radio" name="med_m" value="양호" checked> ✅ 양호</label>
-        <label><input type="radio" name="med_m" value="없음"> ❌ 없음</label>
-      </div>
-      <div class="radio">
-        <span class="radio-label">점심 투약</span>
-        <label><input type="radio" name="med_a" value="양호" checked> ✅ 양호</label>
-        <label><input type="radio" name="med_a" value="없음"> ❌ 없음</label>
-      </div>
-      <div class="radio">
-        <span class="radio-label">저녁 투약</span>
-        <label><input type="radio" name="med_e" value="양호" checked> ✅ 양호</label>
-        <label><input type="radio" name="med_e" value="없음"> ❌ 없음</label>
-      </div>
+      ${medRadio('아침 투약', 'med_m', isEdit ? record.med?.m : null)}
+      ${medRadio('점심 투약', 'med_a', isEdit ? record.med?.a : null)}
+      ${medRadio('저녁 투약', 'med_e', isEdit ? record.med?.e : null)}
     </div>
 
     <div class="section">
       <b><span class="section-icon">✨</span> 외모 꾸밈</b>
-      ${radio("화장", "makeup")}
-      ${radio("의복", "clothes")}
-      ${radio("가방", "bag")}
-      ${radio("신발", "shoes")}
+      ${radio('화장', 'makeup',  isEdit ? record.env?.makeup  : null)}
+      ${radio('의복', 'clothes', isEdit ? record.env?.clothes : null)}
+      ${radio('가방', 'bag',     isEdit ? record.env?.bag     : null)}
+      ${radio('신발', 'shoes',   isEdit ? record.env?.shoes   : null)}
     </div>
 
     <div class="form-group">
       <label>📝 특이사항</label>
-      <textarea id="special" placeholder="특이사항이 있으면 입력하세요"></textarea>
+      <textarea id="special" placeholder="특이사항이 있으면 입력하세요">${isEdit ? (record.special || '') : ''}</textarea>
     </div>
 
     <div class="action-buttons">
       <button class="btn-green" id="saveBtn">
-        <span class="button-icon">💾</span> 저장
+        <span class="button-icon">${isEdit ? '💾' : '💾'}</span> ${isEdit ? '수정 저장' : '저장'}
       </button>
-      <button class="btn-blue" id="nextBtn">
-        <span class="button-icon">➡️</span> 메뉴로
-      </button>
+      ${isEdit ? `<button class="btn-gray" id="cancelBtn"><span class="button-icon">↩️</span> 취소</button>` : ''}
+      <button class="btn-blue" id="nextBtn"><span class="button-icon">↩️</span> 메뉴로</button>
     </div>
   </div>
 </div>`;
-    
+
     document.getElementById('saveBtn').addEventListener('click', saveChecklist);
-    document.getElementById('nextBtn').addEventListener('click', showMenu);
-    
+    document.getElementById('nextBtn').addEventListener('click', () => { editId = null; showMenu(); });
+    if (isEdit) {
+      document.getElementById('cancelBtn').addEventListener('click', () => { editId = null; showSearch(); });
+    }
     setTimeout(() => document.getElementById('c_client').focus(), 100);
   }
-  
+
+  // ─────────────────────────────────────────
+  // 점검표 저장 (신규/수정 공용)
+  // ─────────────────────────────────────────
   async function saveChecklist() {
-    function getRadioValue(name) {
-      const elem = document.querySelector(`input[name="${name}"]:checked`);
-      return elem ? elem.value : "양호";
+    function getRadio(name) {
+      const el = document.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : '양호';
     }
-    
-    const date = document.getElementById('c_date').value;
+    const date       = document.getElementById('c_date').value;
     const clientName = document.getElementById('c_client').value.trim();
     const workerName = document.getElementById('c_worker').value.trim();
-    
-    if (!date) {
-      alert("⚠️ 점검 날짜를 선택해주세요.");
-      document.getElementById('c_date').focus();
-      return;
-    }
-    
-    if (!clientName) {
-      alert("⚠️ 이용자명을 입력해주세요.");
-      document.getElementById('c_client').focus();
-      return;
-    }
-    
-    if (!workerName) {
-      alert("⚠️ 작성 직원명을 입력해주세요.");
-      document.getElementById('c_worker').focus();
-      return;
-    }
-    
+
+    if (!date)       { alert('⚠️ 점검 날짜를 선택해주세요.'); document.getElementById('c_date').focus(); return; }
+    if (!clientName) { alert('⚠️ 이용자명을 입력해주세요.'); document.getElementById('c_client').focus(); return; }
+    if (!workerName) { alert('⚠️ 작성 직원명을 입력해주세요.'); document.getElementById('c_worker').focus(); return; }
     if (!currentUser.facility && currentUser.role !== 'admin') {
-      alert("⚠️ 시설 정보가 없습니다. 관리자에게 문의하세요.");
-      return;
+      alert('⚠️ 시설 정보가 없습니다. 관리자에게 문의하세요.'); return;
     }
-    
-    const newRecord = {
-      id: Date.now(),
-      date: date,
-      clientName: clientName,
-      worker: workerName,
+
+    const record = {
+      date: date, clientName: clientName, worker: workerName,
       facility: currentUser.facility || '미지정',
-      createdAt: new Date().toISOString(),
-      health: {
-        weight: document.getElementById('weight').value.trim(),
-        bp: document.getElementById('bp').value.trim(),
-        bs: document.getElementById('bs').value.trim()
-      },
-      hygiene: {
-        wash: getRadioValue("wash"),
-        dental: getRadioValue("dental"),
-        hair: getRadioValue("hair"),
-        nail: getRadioValue("nail")
-      },
-      meal: {
-        menu: document.getElementById('menu').value.trim(),
-        amount: getRadioValue("meal_amount"),
-        prep: getRadioValue("prep")
-      },
-      daily: {
-        role: getRadioValue("role"),
-        bed: getRadioValue("bed"),
-        cloth: getRadioValue("cloth"),
-        conv: getRadioValue("conv")
-      },
-      med: {
-        m: getRadioValue("med_m"),
-        a: getRadioValue("med_a"),
-        e: getRadioValue("med_e")
-      },
-      env: {
-        makeup: getRadioValue("makeup"),
-        clothes: getRadioValue("clothes"),
-        bag: getRadioValue("bag"),
-        shoes: getRadioValue("shoes")
-      },
+      health:  { weight: document.getElementById('weight').value.trim(), bp: document.getElementById('bp').value.trim(), bs: document.getElementById('bs').value.trim() },
+      hygiene: { wash: getRadio('wash'), dental: getRadio('dental'), hair: getRadio('hair'), nail: getRadio('nail') },
+      meal:    { menu: document.getElementById('menu').value.trim(), amount: getRadio('meal_amount'), prep: getRadio('prep') },
+      daily:   { role: getRadio('role'), bed: getRadio('bed'), cloth: getRadio('cloth'), conv: getRadio('conv') },
+      med:     { m: getRadio('med_m'), a: getRadio('med_a'), e: getRadio('med_e') },
+      env:     { makeup: getRadio('makeup'), clothes: getRadio('clothes'), bag: getRadio('bag'), shoes: getRadio('shoes') },
       special: document.getElementById('special').value.trim()
     };
-    
-    await saveData(newRecord);
+
+    await saveData(record); // editId 값에 따라 INSERT / UPDATE 자동 분기
   }
-  
+
+  // ─────────────────────────────────────────
+  // 카테고리 요약
+  // ─────────────────────────────────────────
   function summaryCategory(obj) {
-    const good = [];
-    const log = [];
-    const none = [];
-    const name = {
-      wash: "세면", dental: "구강관리", hair: "머리정돈", nail: "손발톱관리",
-      prep: "식사준비", role: "역할활동", bed: "침구정돈", cloth: "의복정리", conv: "대화",
-      makeup: "화장", clothes: "의복", bag: "가방", shoes: "신발", 
-      m: "아침", a: "점심", e: "저녁"
-    };
-    
+    const names = { wash:'세면', dental:'구강관리', hair:'머리정돈', nail:'손발톱관리', prep:'식사준비', role:'역할활동', bed:'침구정돈', cloth:'의복정리', conv:'대화', makeup:'화장', clothes:'의복', bag:'가방', shoes:'신발', m:'아침', a:'점심', e:'저녁' };
+    const good=[], log=[], none=[];
     for (let k in obj) {
-      if (obj[k] === "양호") good.push(name[k] || k);
-      if (obj[k] === "일지") log.push(name[k] || k);
-      if (obj[k] === "없음") none.push(name[k] || k);
+      if (obj[k]==='양호') good.push(names[k]||k);
+      if (obj[k]==='일지') log.push(names[k]||k);
+      if (obj[k]==='없음') none.push(names[k]||k);
     }
-    
-    let result = `✅ 양호: ${good.join(", ") || "없음"}`;
-    if (log.length > 0) result += ` / 📝 일지: ${log.join(", ")}`;
-    if (none.length > 0) result += ` / ❌ 없음: ${none.join(", ")}`;
-    
-    return result;
+    let r = `✅ 양호: ${good.join(', ')||'없음'}`;
+    if (log.length)  r += ` / 📝 일지: ${log.join(', ')}`;
+    if (none.length) r += ` / ❌ 없음: ${none.join(', ')}`;
+    return r;
   }
-  
+
+  // ─────────────────────────────────────────
+  // 기록 조회 화면
+  // ─────────────────────────────────────────
   async function showSearch() {
     const today = new Date();
-    const past = new Date();
-    past.setDate(today.getDate() - 7);
-    
-    const app = document.getElementById('app');
-    app.innerHTML = `
+    const past  = new Date(); past.setDate(today.getDate() - 7);
+
+    document.getElementById('app').innerHTML = `
 <div class="container">
   <div class="card">
-    <h3><span class="header-icon">🔍</span> 기록 조회</h3>
-
+    <h3>
+      <span class="header-icon">🔍</span> 기록 조회
+      <span class="sort-badge">📅 과거순 정렬</span>
+    </h3>
     <div class="search-form">
       <div class="form-group">
         <label>👤 이용자명</label>
@@ -1020,40 +682,35 @@ tr:hover td {
         <input type="date" id="endDate" value="${today.toISOString().split('T')[0]}">
       </div>
     </div>
-
     <div class="action-buttons">
-      <button class="btn-blue" id="refreshBtn">
-        <span class="button-icon">🔄</span> 새로고침 & 조회
-      </button>
-      <button class="btn-gray" id="backBtn">
-        <span class="button-icon">↩️</span> 뒤로
-      </button>
+      <button class="btn-blue" id="refreshBtn"><span class="button-icon">🔄</span> 새로고침 & 조회</button>
+      <button class="btn-gray" id="backBtn"><span class="button-icon">↩️</span> 뒤로</button>
     </div>
-
     <div id="result"></div>
   </div>
 </div>`;
-    
-    document.getElementById('refreshBtn').addEventListener('click', async () => {
-      await loadData();
-      search();
-    });
+
+    document.getElementById('refreshBtn').addEventListener('click', async () => { await loadData(); search(); });
     document.getElementById('backBtn').addEventListener('click', showMenu);
-    
+
     await loadData();
     search();
   }
-  
+
+  // ─────────────────────────────────────────
+  // 검색 & 결과 렌더링
+  // [수정] 과거순(오래된 날짜 먼저) 정렬 적용
+  // ─────────────────────────────────────────
   function search() {
     const clientName = document.getElementById('searchClient').value.trim();
-    const startDate = document.getElementById('startDate').value;
-    const endDate = document.getElementById('endDate').value;
-    
-    let filtered = checklists.filter(record => {
-      const matchFacility = currentUser.role === 'admin' || record.facility === currentUser.facility;
-      const matchClient = !clientName || record.clientName.includes(clientName);
-      const matchStart = !startDate || record.date >= startDate;
-      const matchEnd = !endDate || record.date <= endDate;
+    const startDate  = document.getElementById('startDate').value;
+    const endDate    = document.getElementById('endDate').value;
+
+    let filtered = checklists.filter(r => {
+      const matchFacility = currentUser.role === 'admin' || r.facility === currentUser.facility;
+      const matchClient   = !clientName || r.clientName.includes(clientName);
+      const matchStart    = !startDate  || r.date >= startDate;
+      const matchEnd      = !endDate    || r.date <= endDate;
       return matchFacility && matchClient && matchStart && matchEnd;
     });
 
@@ -1063,124 +720,113 @@ tr:hover td {
           <div class="empty-state-icon">📭</div>
           <h3>검색 결과가 없습니다</h3>
           <p>다른 조건으로 검색해보세요.</p>
-        </div>
-      `;
+        </div>`;
       return;
     }
 
+    // ✅ 과거순 정렬 (오래된 날짜 → 최신 날짜)
     filtered.sort((a, b) => {
-      if (b.date !== a.date) return b.date.localeCompare(a.date);
-      return b.id - a.id;
+      if (a.date !== b.date) return a.date.localeCompare(b.date); // 날짜 오름차순
+      return a.id - b.id; // 같은 날짜면 id 오름차순
     });
 
+    const facilityCol = currentUser.role === 'admin';
+
     let html = `
-      <div style="margin-bottom: 10px; color: #6b7280;">
-        📊 총 <strong style="color: #667eea;">${filtered.length}건</strong>의 기록이 조회되었습니다.
-        ${currentUser.role !== 'admin' ? `<span style="margin-left: 10px;">(${currentUser.facility} 시설)</span>` : '<span style="margin-left: 10px;">(전체 시설)</span>'}
+      <div style="margin-bottom:10px; color:#6b7280;">
+        📊 총 <strong style="color:#667eea;">${filtered.length}건</strong>의 기록 (과거 → 최신 순)
+        ${!facilityCol ? `<span style="margin-left:10px;">(${currentUser.facility} 시설)</span>` : '<span style="margin-left:10px;">(전체 시설)</span>'}
       </div>
       <table>
         <tr>
-          <th style="width: 100px;">날짜</th>
-          <th style="width: 100px;">이용자</th>
-          <th style="width: 80px;">담당자</th>
-          ${currentUser.role === 'admin' ? '<th style="width: 80px;">시설</th>' : ''}
+          <th style="width:100px;">날짜</th>
+          <th style="width:100px;">이용자</th>
+          <th style="width:80px;">담당자</th>
+          ${facilityCol ? '<th style="width:80px;">시설</th>' : ''}
           <th>상세 내용</th>
-          <th style="width: 80px;">관리</th>
+          <th style="width:120px;">관리</th>
         </tr>`;
-    
+
     filtered.forEach(record => {
       html += `
       <tr>
-        <td style="text-align:center; white-space:nowrap; font-weight: 600;">${record.date}</td>
-        <td style="text-align:center; font-weight:600; color: #667eea;">${record.clientName}</td>
+        <td style="text-align:center;white-space:nowrap;font-weight:600;">${record.date}</td>
+        <td style="text-align:center;font-weight:600;color:#667eea;">${record.clientName}</td>
         <td style="text-align:center;">${record.worker}</td>
-        ${currentUser.role === 'admin' ? `<td style="text-align:center; color: #059669;">${record.facility || '미지정'}</td>` : ''}
+        ${facilityCol ? `<td style="text-align:center;color:#059669;">${record.facility||'미지정'}</td>` : ''}
         <td>
-          <div style="line-height:1.9; font-size: 13px;">
-            ${record.health.weight || record.health.bp || record.health.bs ? 
-              `<div style="margin-bottom: 8px;"><strong>💊 건강:</strong> 체중 ${record.health.weight || '-'} | 혈압 ${record.health.bp || '-'} | 혈당 ${record.health.bs || '-'}</div>` : ''}
-            ${record.meal.menu ? 
-              `<div style="margin-bottom: 8px;"><strong>🍽️ 식사:</strong> ${record.meal.menu} (섭취량: ${record.meal.amount})</div>` : ''}
-            <div style="margin-bottom: 5px;"><strong>🧼 위생:</strong> ${summaryCategory(record.hygiene)}</div>
-            <div style="margin-bottom: 5px;"><strong>🏠 일상:</strong> ${summaryCategory(record.daily)}</div>
-            <div style="margin-bottom: 5px;"><strong>💉 투약:</strong> ${summaryCategory(record.med)}</div>
-            <div style="margin-bottom: 5px;"><strong>✨ 외모:</strong> ${summaryCategory(record.env)}</div>
-            ${record.special ? 
-              `<div style="margin-top: 10px; padding: 10px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px;">
-                <strong style="color: #92400e;">📌 특이사항:</strong> ${record.special}
-              </div>` : ''}
+          <div style="line-height:1.9;font-size:13px;">
+            ${record.health.weight||record.health.bp||record.health.bs
+              ? `<div style="margin-bottom:8px;"><strong>💊 건강:</strong> 체중 ${record.health.weight||'-'} | 혈압 ${record.health.bp||'-'} | 혈당 ${record.health.bs||'-'}</div>` : ''}
+            ${record.meal.menu
+              ? `<div style="margin-bottom:8px;"><strong>🍽️ 식사:</strong> ${record.meal.menu} (섭취량: ${record.meal.amount})</div>` : ''}
+            <div style="margin-bottom:5px;"><strong>🧼 위생:</strong> ${summaryCategory(record.hygiene)}</div>
+            <div style="margin-bottom:5px;"><strong>🏠 일상:</strong> ${summaryCategory(record.daily)}</div>
+            <div style="margin-bottom:5px;"><strong>💉 투약:</strong> ${summaryCategory(record.med)}</div>
+            <div style="margin-bottom:5px;"><strong>✨ 외모:</strong> ${summaryCategory(record.env)}</div>
+            ${record.special
+              ? `<div style="margin-top:10px;padding:10px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:4px;">
+                  <strong style="color:#92400e;">📌 특이사항:</strong> ${record.special}
+                </div>` : ''}
           </div>
         </td>
         <td style="text-align:center;">
-          <button class="btn-red delete-btn" data-id="${record.id}" style="padding: 8px 12px; margin: 0;">
+          <button class="btn-orange edit-btn" data-id="${record.id}" style="padding:7px 10px;margin:2px;font-size:13px;">
+            ✏️ 수정
+          </button>
+          <button class="btn-red delete-btn" data-id="${record.id}" style="padding:7px 10px;margin:2px;font-size:13px;">
             🗑️ 삭제
           </button>
         </td>
       </tr>`;
     });
-    
-    html += "</table>";
+
+    html += '</table>';
     document.getElementById('result').innerHTML = html;
-    
+
+    // 수정 버튼 이벤트
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
+        const id = e.currentTarget.getAttribute('data-id');
+        editRecord(id);
+      });
+    });
+
+    // 삭제 버튼 이벤트
     document.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', e => {
         const id = e.currentTarget.getAttribute('data-id');
         deleteRecord(id);
       });
     });
   }
-  
+
+  // ─────────────────────────────────────────
+  // 앱 초기화
+  // ─────────────────────────────────────────
   async function init() {
     try {
       if (!initSupabase()) {
-        document.getElementById('app').innerHTML = `
-          <div class="container">
-            <div class="card">
-              <h2>❌ 오류</h2>
-              <p style="text-align: center; color: #dc2626; margin-top: 20px;">
-                Supabase 초기화에 실패했습니다.<br>
-                페이지를 새로고침하거나 관리자에게 문의하세요.
-              </p>
-            </div>
-          </div>
-        `;
+        document.getElementById('app').innerHTML = `<div class="container"><div class="card"><h2>❌ Supabase 초기화 실패</h2></div></div>`;
         return;
       }
-      
       const hasSession = await checkSession();
-      if (hasSession) {
-        await loadData();
-        showMenu();
-      } else {
-        showLogin();
-      }
-    } catch (error) {
-      console.error('초기화 오류:', error);
-      document.getElementById('app').innerHTML = `
-        <div class="container">
-          <div class="card">
-            <h2>❌ 오류</h2>
-            <p style="text-align: center; color: #dc2626; margin-top: 20px;">
-              시스템 초기화 중 오류가 발생했습니다.<br>
-              페이지를 새로고침하거나 관리자에게 문의하세요.
-            </p>
-          </div>
-        </div>
-      `;
+      if (hasSession) { await loadData(); showMenu(); }
+      else { showLogin(); }
+    } catch (e) {
+      console.error(e);
+      document.getElementById('app').innerHTML = `<div class="container"><div class="card"><h2>❌ 초기화 오류</h2><p>${e.message}</p></div></div>`;
     }
   }
-  
-  window.onerror = function(msg, url, line) {
-    console.error('전역 오류:', msg, url, line);
-    return false;
-  };
-  
+
+  window.onerror = (msg, url, line) => { console.error('전역 오류:', msg, url, line); return false; };
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
-  
+
 })();
 </script>
 </body>
